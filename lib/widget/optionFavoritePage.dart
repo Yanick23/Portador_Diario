@@ -19,24 +19,26 @@ class OptionFavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            if (iconsRow_1 != null) iconsRow_1!,
-            if (iconsRow_1 != null)
-              const SizedBox(
-                width: 20,
-              ),
-            Text(
-              text,
-              style: TextStyle(color: colorText, fontSize: 17),
-            )
-          ],
-        ),
-        iconOrText
-      ],
+    return InkWell(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              if (iconsRow_1 != null) iconsRow_1!,
+              if (iconsRow_1 != null)
+                const SizedBox(
+                  width: 20,
+                ),
+              Text(
+                text,
+                style: TextStyle(color: colorText, fontSize: 17),
+              )
+            ],
+          ),
+          iconOrText
+        ],
+      ),
     );
   }
 }

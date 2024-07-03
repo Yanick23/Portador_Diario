@@ -11,13 +11,13 @@ class CardArtistaFavorito extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 100,
-        width: 100,
+        height: 90,
+        width: 90,
         child: CircleAvatar(
           backgroundColor: Color.fromARGB(255, 87, 87, 87),
           child: Text(
             nome,
-            style: TextStyle(fontSize: 20, color: Colors.white),
+            style: TextStyle(fontSize: 18, color: Colors.white),
           ),
         ));
   }

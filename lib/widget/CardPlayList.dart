@@ -12,28 +12,28 @@ class CardPlayList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 120,
-          height: 120,
+          width: 100,
+          height: 100,
           decoration: const BoxDecoration(
               color: Color.fromARGB(255, 87, 87, 87),
               borderRadius: BorderRadius.all(Radius.circular(10))),
           child: const Icon(
             Icons.queue_music_sharp,
-            size: 50,
+            size: 40,
           ),
         ),
         titulo != null
             ? Text(
                 titulo!,
-                style: const TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 16),
               )
             : const Text(
                 "",
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 10),
               ),
         descricao != null
             ? Text(descricao!,
-                style: const TextStyle(fontSize: 16, color: Colors.grey))
+                style: const TextStyle(fontSize: 14, color: Colors.grey))
             : const Text("")
       ],
     );

@@ -22,6 +22,8 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
     return Container(
       padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const OptionFavoritePage(
             text: "A minha musica aleatoria",
@@ -72,7 +74,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
           GestureDetector(
             onTap: () {
               Provider.of<PageState>(context, listen: false)
-                  .updateSelectedPage(2);
+                  .updateSelectedPage(5);
             },
             child: const OptionFavoritePage(
               text: "Playlists",

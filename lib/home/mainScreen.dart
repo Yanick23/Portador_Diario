@@ -16,6 +16,15 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final PageController _pageController = PageController();
 
+  final List<Widget> _widgets = [
+    const HomeScreen(),
+    const Favoritoscreen(),
+    const Favoritoscreen(),
+    const HomeScreen(),
+    const Favoritoscreen(),
+    const Playlistscreen()
+  ];
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -24,43 +33,88 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int selectedPage = Provider.of<PageState>(context).selectedPage;
+
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (int value) {
-          Provider.of<PageState>(context, listen: false)
-              .updateSelectedPage(value);
-        },
-        children: [
-          HomeScreen(),
-          Favoritoscreen(),
-          HomeScreen(),
-          HomeScreen(),
-          Favoritoscreen(),
-          Playlistscreen()
-        ],
+      body: Container(
+        child: _widgets[selectedPage],
       ),
       bottomNavigationBar: Consumer<PageState>(
         builder: (context, pageState, child) {
           return NavigationBar(
-            selectedIndex: pageState.selectedPage,
-            onDestinationSelected: (int index) {
-              pageState.updateSelectedPage(index);
-              _pageController.animateToPage(
-                index,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.ease,
-              );
-            },
-            destinations: const <NavigationDestination>[
-              NavigationDestination(
-                  icon: Icon(Icons.music_note_outlined), label: "Musica"),
-              NavigationDestination(
-                  icon: Icon(Icons.podcasts_rounded), label: "Podcasts"),
-              NavigationDestination(
-                  icon: Icon(Icons.favorite_border), label: "Favoritos"),
-              NavigationDestination(
-                  icon: Icon(Icons.search_sharp), label: "Pesquisa")
+            destinations: [
+              Container(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                    width: 60,
+                    height: 40,
+                    child: IconButton(
+                      icon: Icon(Icons.music_note_outlined),
+                      onPressed: () {
+                        pageState.updateSelectedPage(0);
+                      },
+                    ),
+                  ),
+                  const Text("Musica",
+                      style: TextStyle(fontWeight: FontWeight.bold))
+                ],
+              )),
+              Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Container(
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                  width: 60,
+                  height: 40,
+                  child: IconButton(
+                      onPressed: () {
+                        pageState.updateSelectedPage(1);
+                      },
+                      icon: const Icon(Icons.podcasts_rounded)),
+                ),
+                const Text("Podcast",
+                    style: TextStyle(fontWeight: FontWeight.bold))
+              ]),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                    width: 60,
+                    height: 40,
+                    child: IconButton(
+                      icon: Icon(Icons.favorite_border),
+                      onPressed: () {
+                        pageState.updateSelectedPage(2);
+                      },
+                    ),
+                  ),
+                  const Text("Favoritos",
+                      style: TextStyle(fontWeight: FontWeight.bold))
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                    width: 60,
+                    height: 40,
+                    child: IconButton(
+                        onPressed: () {
+                          pageState.updateSelectedPage(3);
+                        },
+                        icon: const Icon(Icons.search_sharp)),
+                  ),
+                  const Text("Pesquisa",
+                      style: TextStyle(fontWeight: FontWeight.bold))
+                ],
+              )
             ],
           );
         },
