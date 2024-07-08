@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:spoti_stream_music/widget/CardPlayList.dart';
-import 'package:spoti_stream_music/home/pageViewFavoriteMusic.dart';
+import 'package:spoti_stream_music/widgets/CardPlayList.dart';
+import 'package:spoti_stream_music/pages/pageViewFavoriteMusic.dart';
 
 class Favoritoscreen extends StatefulWidget {
   const Favoritoscreen({super.key});

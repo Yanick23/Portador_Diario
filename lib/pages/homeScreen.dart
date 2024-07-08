@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:spoti_stream_music/widget/CardPlayList.dart';
-import 'package:spoti_stream_music/widget/cardArtistaFavorito.dart';
+import 'package:spoti_stream_music/widgets/CardPlayList.dart';
+import 'package:spoti_stream_music/widgets/cardArtistaFavorito.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,31 +87,22 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: EdgeInsets.only(left: 8),
               height: 280,
-              child: ListView(
+              child: ListView.builder(
+                itemCount: 7,
+                itemBuilder: (context, index) {
+                  return const Row(
+                    children: [
+                      CardPlayList(
+                        descricao: "50 temas",
+                        titulo: "100% azagaia",
+                      ),
+                      SizedBox(
+                        width: 10,
+                      )
+                    ],
+                  );
+                },
                 scrollDirection: Axis.horizontal,
-                children: const [
-                  CardPlayList(
-                    descricao: "50 temas",
-                    titulo: "100% azagaia",
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  CardPlayList(
-                    descricao: "50 temas",
-                    titulo: "100% Laylizzy",
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  CardPlayList(
-                    descricao: "50 temas",
-                    titulo: "100% Drake",
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                ],
               ),
             )
           ],

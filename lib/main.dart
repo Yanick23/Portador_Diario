@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/home/homeScreen.dart';
-import 'package:spoti_stream_music/home/mainScreen.dart';
-import 'package:spoti_stream_music/home/playLIstScreen.dart';
+import 'package:spoti_stream_music/pages/mainScreen.dart';
+import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 
 void main() {
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: ColorScheme.dark()),
+      theme: ThemeData(colorScheme: const ColorScheme.dark()),
       initialRoute: "/",
       routes: {
         "/": (context) => const MainScreen(),

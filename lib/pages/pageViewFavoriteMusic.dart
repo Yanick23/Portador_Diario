@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/home/homeScreen.dart';
-import 'package:spoti_stream_music/home/playLIstScreen.dart';
+import 'package:spoti_stream_music/pages/homeScreen.dart';
+import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/widget/optionFavoritePage.dart';
+import 'package:spoti_stream_music/widgets/optionFavoritePage.dart';
 
 class PageViewFavoriteMusic extends StatefulWidget {
   final int? onNavigateToPlaylist;

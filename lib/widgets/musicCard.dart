@@ -1,19 +1,18 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/playlistInfo.dart';
+import 'package:spoti_stream_music/models/modelsData.dart' as playlist;
 
-class CardplayListInfo extends StatelessWidget {
-  final Playlistinfo playlistinfo;
-  const CardplayListInfo({super.key, required this.playlistinfo});
+class MusicCard extends StatelessWidget {
+  // final playlist.Playlistinfo playlistinfo;
+  const MusicCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(width: 2, color: Colors.grey))),
-      child: ListTile(
+        decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(width: 2, color: Colors.grey))),
+        child: ListTile(
           leading: Image.network(
-            playlistinfo.image,
+            "kk",
             errorBuilder: (context, error, stackTrace) => Container(
               child: Container(
                   height: 60,
@@ -25,11 +24,11 @@ class CardplayListInfo extends StatelessWidget {
                   child: Icon(Icons.music_note)),
             ),
           ),
-          title: Text(playlistinfo.nome),
-          subtitle: Text(' ${playlistinfo.nome}'),
+          title: Text("hh"),
+          subtitle: Text(' gg'),
           trailing: Container(
             child: Icon(Icons.play_arrow),
-          )),
-    );
+          ),
+        ));
   }
 }

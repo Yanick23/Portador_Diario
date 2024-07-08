@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/models/playlistInfo.dart';
+import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/widget/CardPlayList.dart';
-import 'package:spoti_stream_music/widget/cardplayListInfo.dart';
+import 'package:spoti_stream_music/widgets/CardPlayList.dart';
+import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
+import 'package:spoti_stream_music/widgets/jj.dart';
 
 class Playlistscreen extends StatefulWidget {
   const Playlistscreen({super.key});
-
   @override
   State<Playlistscreen> createState() => _PlaylistscreenState();
 }
@@ -49,9 +49,15 @@ class _PlaylistscreenState extends State<Playlistscreen> {
           itemCount: _playlists.length,
           itemBuilder: (context, index) {
             final playlist = _playlists[index];
-            return CardplayListInfo(
-              playlistinfo:
-                  Playlistinfo(playlist.nome, playlist.criador, playlist.image),
+            return GestureDetector(
+              onTap: () {
+                Provider.of<PageState>(context, listen: false)
+                    .updateSelectedPage(6);
+              },
+              child: CardplayListInfo(
+                playlistinfo: Playlistinfo(
+                    playlist.nome, playlist.criador, playlist.image),
+              ),
             );
           },
         ),

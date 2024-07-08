@@ -12,8 +12,8 @@ class CardPlayList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 100,
-          height: 100,
+          width: 150,
+          height: 150,
           decoration: const BoxDecoration(
               color: Color.fromARGB(255, 87, 87, 87),
               borderRadius: BorderRadius.all(Radius.circular(10))),
