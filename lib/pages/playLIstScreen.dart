@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/widgets/CardPlayList.dart';
+import 'package:spoti_stream_music/servicies/playListService.dart';
 import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
-import 'package:spoti_stream_music/widgets/jj.dart';
 
 class Playlistscreen extends StatefulWidget {
   const Playlistscreen({super.key});
@@ -13,10 +12,16 @@ class Playlistscreen extends StatefulWidget {
 }
 
 class _PlaylistscreenState extends State<Playlistscreen> {
-  final List<Playlistinfo> _playlists = [
-    Playlistinfo("Playlist 1", "Description 1", "ImageURL 1"),
-    Playlistinfo("Playlist 2", "Description 2", "ImageURL 2"),
-  ];
+  late Playlista? playlist1 = PlaylistService().getPlayList();
+  final List<Playlista?> _playlists = [];
+
+  @override
+  void initState() {
+    setState(() {
+      _playlists.add(playlist1);
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +60,7 @@ class _PlaylistscreenState extends State<Playlistscreen> {
                     .updateSelectedPage(6);
               },
               child: CardplayListInfo(
-                playlistinfo: Playlistinfo(
-                    playlist.nome, playlist.criador, playlist.image),
+                playlistinfo: _playlists[index]!,
               ),
             );
           },

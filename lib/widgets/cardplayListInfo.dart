@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spoti_stream_music/models/modelsData.dart' as playlist;
 
 class CardplayListInfo extends StatelessWidget {
-  final playlist.Playlistinfo playlistinfo;
+  final playlist.Playlista playlistinfo;
   const CardplayListInfo({super.key, required this.playlistinfo});
 
   @override
@@ -12,7 +12,7 @@ class CardplayListInfo extends StatelessWidget {
           border: Border(bottom: BorderSide(width: 2, color: Colors.grey))),
       child: ListTile(
           leading: Image.network(
-            playlistinfo.image,
+            playlistinfo.images!.first!.url!,
             errorBuilder: (context, error, stackTrace) => Container(
               child: Container(
                   height: 60,
@@ -24,11 +24,12 @@ class CardplayListInfo extends StatelessWidget {
                   child: Icon(Icons.music_note)),
             ),
           ),
-          title: Text(playlistinfo.nome),
-          subtitle: Text(' ${playlistinfo.nome}'),
-          trailing: Container(
-            child: Icon(Icons.play_arrow),
-          )),
+          title: Text(playlistinfo!.name!),
+          subtitle: Text(
+            '${playlistinfo.owner!.displayName!}',
+            style: TextStyle(color: Colors.grey),
+          ),
+          trailing: const Icon(Icons.play_arrow)),
     );
   }
 }

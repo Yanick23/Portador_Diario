@@ -1,48 +1,129 @@
+import 'dart:ffi';
+
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:palette_generator/palette_generator.dart';
 import 'package:spoti_stream_music/models/modelsData.dart' as trackm;
+import 'package:spoti_stream_music/models/modelsData.dart' as listMusix;
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class MusicPlayer extends StatefulWidget {
-  final trackm.Track? track;
-  const MusicPlayer({super.key, this.track});
+  final int? track;
+  final List<listMusix.Track> lista;
+  const MusicPlayer({super.key, this.track, required this.lista});
 
   @override
   State<MusicPlayer> createState() => _MusicPlayerState();
 }
 
 class _MusicPlayerState extends State<MusicPlayer> {
-  trackm.Track? track;
-  YourAudioPlayer player = YourAudioPlayer();
+  int? track;
+  Duration? duration;
+  bool isPlaying = false;
+  bool isLoading = true;
+  late AudioPlayer player;
+  late List<listMusix.Track> a;
 
   @override
   void initState() {
     super.initState();
+    player = AudioPlayer();
     track = widget.track;
+    a = widget.lista;
 
     if (track != null) {
       _initializeTrack();
     }
+
+    player.onPlayerComplete.listen((event) {
+      _nextTrack();
+    });
+  }
+
+  Future<void> PlayMusic(String text) async {
+    final yt = YoutubeExplode();
+    final video = (await yt.search.search(text)).first;
+    final videoId = video.id.value;
+
+    var manifest = await yt.videos.streamsClient.getManifest(videoId);
+    var audioUrl = manifest.audioOnly.last.url;
+    print(audioUrl.toString());
+
+    setState(() {
+      isPlaying = true;
+      duration = video.duration!;
+    });
+    await player.play(UrlSource(audioUrl.toString()));
   }
 
   late Color? color = Colors.black;
 
   void _initializeTrack() async {
-    String? tempSongName = track?.name;
-    if (tempSongName != null) {
-      track?.name = tempSongName;
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var currentTrack = a[track!];
+      await PlayMusic(
+          '${currentTrack.artists!.first.name} - ${currentTrack.name}');
+      String? tempSongName = currentTrack.name;
+      if (tempSongName != null) {
+        currentTrack.name = tempSongName;
 
-      String? image = track?.album?.images?.first.url;
+        String? image = currentTrack.album?.images?.first.url;
+        if (image != null) {
+          final tempSongColor = await getImagePalette(NetworkImage(image));
+          if (tempSongColor != null) {
+            setState(() {
+              color = tempSongColor;
+              isLoading = false;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _changeMusic(int index) async {
+    setState(() {
+      isLoading = true;
+      isPlaying = false;
+    });
+
+    var nextTrack = a[index];
+    await PlayMusic('${nextTrack.artists!.first!.name} - ${nextTrack.name}');
+    String? tempSongName = nextTrack.name;
+    if (tempSongName != null) {
+      nextTrack.name = tempSongName;
+
+      String? image = nextTrack.album?.images?.first.url;
       if (image != null) {
-        final tempSongColor = await getImagePalette(const AssetImage(
-            "assets/tlp_hero_album-covers-d12ef0296af80b58363dc0deef077ecc.jpg"));
+        final tempSongColor = await getImagePalette(NetworkImage(image));
         if (tempSongColor != null) {
           setState(() {
             color = tempSongColor;
+            isLoading = false;
+            track = index;
           });
         }
       }
+    }
+  }
+
+  void _nextTrack() {
+    if (track! + 1 < a.length) {
+      _changeMusic(track! + 1);
+    }
+  }
+
+  void _previousTrack() {
+    if (track! - 1 >= 0) {
+      _changeMusic(track! - 1);
     }
   }
 
@@ -55,6 +136,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    var currentTrack = a[track!];
 
     return Scaffold(
       backgroundColor: color!,
@@ -79,16 +161,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.white,
-                            backgroundImage: track?.artists!.first != null
-                                ? NetworkImage("")
-                                : null,
-                            radius: 10,
-                          ),
                           const SizedBox(width: 4),
                           Text(
-                            track?.artists?.first.name ?? "",
+                            currentTrack.artists?.first.name ?? "",
                             style: textTheme.bodyLarge
                                 ?.copyWith(color: Colors.white),
                           )
@@ -102,9 +177,14 @@ class _MusicPlayerState extends State<MusicPlayer> {
               Expanded(
                 flex: 2,
                 child: Center(
-                  child: ArtWorkImage(
-                    image: track!.album!.images!.first!.url,
-                  ),
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                          color: Colors.blue,
+                        ))
+                      : ArtWorkImage(
+                          image: currentTrack.album!.images!.first!.url,
+                        ),
                 ),
               ),
               Expanded(
@@ -117,12 +197,12 @@ class _MusicPlayerState extends State<MusicPlayer> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              track?.name ?? '',
+                              currentTrack.name ?? '',
                               style: textTheme.titleLarge
                                   ?.copyWith(color: Colors.white),
                             ),
                             Text(
-                              track?.artists!.first.name ?? '-',
+                              currentTrack.artists!.first.name ?? '-',
                               style: textTheme.titleMedium
                                   ?.copyWith(color: Colors.white60),
                             ),
@@ -135,12 +215,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    StreamBuilder(
+                    StreamBuilder<Duration>(
                         stream: player.onPositionChanged,
-                        builder: (context, data) {
+                        builder: (context, snapshot) {
                           return ProgressBar(
-                            progress: data.data ?? const Duration(seconds: 0),
-                            total: const Duration(minutes: 4),
+                            progress:
+                                snapshot.data ?? const Duration(seconds: 0),
+                            total: duration ?? const Duration(minutes: 4),
                             bufferedBarColor: Colors.white38,
                             baseBarColor: Colors.white10,
                             thumbColor: Colors.white,
@@ -158,50 +239,34 @@ class _MusicPlayerState extends State<MusicPlayer> {
                       children: [
                         IconButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LyricsPage(
-                                    track: track,
-                                    player:
-                                        player), // Placeholder for your lyrics page
-                              ),
-                            );
+                            _previousTrack();
                           },
-                          icon: const Icon(Icons.lyrics_outlined,
-                              color: Colors.white),
-                        ),
-                        IconButton(
-                          onPressed: () {},
                           icon: const Icon(Icons.skip_previous,
                               color: Colors.white, size: 36),
                         ),
                         IconButton(
                           onPressed: () async {
-                            if (player.state == PlayerState.playing) {
-                              player.pause();
+                            if (isPlaying) {
+                              await player.pause();
                             } else {
-                              player.resume();
+                              await player.resume();
                             }
-                            setState(() {});
+                            setState(() {
+                              isPlaying = !isPlaying;
+                            });
                           },
                           icon: Icon(
-                            player.state == PlayerState.playing
-                                ? Icons.pause
-                                : Icons.play_circle,
+                            isPlaying ? Icons.pause_sharp : Icons.play_arrow,
                             color: Colors.white,
                             size: 60,
                           ),
                         ),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            _nextTrack();
+                          },
                           icon: const Icon(Icons.skip_next,
                               color: Colors.white, size: 36),
-                        ),
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.loop,
-                              color: CustomColors.primaryColor),
                         ),
                       ],
                     )
@@ -223,8 +288,24 @@ class ArtWorkImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return image != null
-        ? Image.asset(
-            "assets/tlp_hero_album-covers-d12ef0296af80b58363dc0deef077ecc.jpg")
+        ? Image.network(
+            image!,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(
+                          width: 2,
+                          color: Colors.grey,
+                          style: BorderStyle.solid)),
+                  child: const Icon(
+                    Icons.music_note_outlined,
+                    size: 120,
+                  ));
+            },
+          )
         : Container(
             child: Icon(
               Icons.music_note,
@@ -234,32 +315,10 @@ class ArtWorkImage extends StatelessWidget {
   }
 }
 
-class YourAudioPlayer {
-  void dispose() {}
-  void seek(Duration duration) {}
-  void pause() async {}
-  void resume() async {}
-  Stream<Duration> get onPositionChanged => Stream.value(Duration.zero);
-  PlayerState get state => PlayerState.paused;
-}
-
-enum PlayerState { playing, paused }
-
 Future<Color?> getImagePalette(ImageProvider imageProvider) async {
   final PaletteGenerator paletteGenerator =
       await PaletteGenerator.fromImageProvider(imageProvider);
   return paletteGenerator.dominantColor?.color;
-}
-
-class LyricsPage extends StatelessWidget {
-  final trackm.Track? track;
-  final YourAudioPlayer player;
-  const LyricsPage({super.key, this.track, required this.player});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
-  }
 }
 
 class CustomColors {
