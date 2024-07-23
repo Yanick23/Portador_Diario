@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/pages/mainScreen.dart';
 import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
+import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
+import 'package:spoti_stream_music/providers/typeReproducer.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -21,6 +23,12 @@ void main() {
       ),
       ChangeNotifierProvider(
         create: (context) => PlayMusicBarState(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => ImagePlayListAndAlbumstate(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => TypereproducerState(),
       )
     ],
     child: const MyApp(),

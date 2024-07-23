@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/pages/musicPlayer.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
+import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
+import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/widgets/trackCard.dart';
+import 'package:spotify/spotify.dart' as spoti;
 
 class PlayListMusic extends StatefulWidget {
   const PlayListMusic({super.key});
@@ -17,7 +20,7 @@ class PlayListMusic extends StatefulWidget {
 class _PlayListMusicState extends State<PlayListMusic> {
   late ScrollController scrollController;
   double imageSize = 0;
-  double initialSize = 200;
+  double initialSize = 210;
   double containerHeight = 500;
   double containerinitalHeight = 500;
   double imageOpacity = 1;
@@ -25,15 +28,17 @@ class _PlayListMusicState extends State<PlayListMusic> {
   late Color? color = Colors.black;
   late bool _isLoading = true;
   late List<Track> list = [];
+  late String imageUrl = '';
 
+  late Object trackInfo = Object();
   @override
   void initState() {
     super.initState();
     imageSize = initialSize;
     scrollController = ScrollController()
       ..addListener(() {
+        imageSize = initialSize - scrollController.offset;
         if (!showTopBar) {
-          imageSize = initialSize - scrollController.offset;
           if (imageSize < 0) {
             imageSize = 0;
           }
@@ -58,19 +63,20 @@ class _PlayListMusicState extends State<PlayListMusic> {
   }
 
   Future<void> _initializeTrack() async {
-    var playlist = Provider.of<PlaylistState>(context).getPlaylist!;
+    var tracks = Provider.of<PlaylistState>(context).getTrackList;
+    imageUrl = Provider.of<ImagePlayListAndAlbumstate>(context).imageUrl;
+    trackInfo = Provider.of<TypereproducerState>(context).ObjecTypereproducer;
     try {
       setState(() {
         list = [];
-        playlist!.tracks!.items!.forEach(
+        tracks!.forEach(
           (element) {
-            list.add(element!.track!);
+            list.add(element!);
           },
         );
       });
 
-      final tempSongColor =
-          await getImagePalette(NetworkImage('${playlist.images!.first.url}'));
+      final tempSongColor = await getImagePalette(NetworkImage('$imageUrl'));
       if (tempSongColor != null) {
         setState(() {
           color = tempSongColor;
@@ -89,7 +95,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
 
   @override
   Widget build(BuildContext context) {
-    var playlist = Provider.of<PlaylistState>(context).getPlaylist!;
+    list = Provider.of<PlaylistState>(context).getTrackList!;
 
     return Scaffold(
       backgroundColor: color,
@@ -115,10 +121,10 @@ class _PlayListMusicState extends State<PlayListMusic> {
                             colors: [
                           Colors.black.withOpacity(0),
                           Color.fromARGB(255, 0, 0, 0).withOpacity(0),
-                          Color.fromARGB(255, 0, 0, 0).withOpacity(0),
+                          Color.fromARGB(255, 179, 166, 166).withOpacity(0),
                           color!.withOpacity(0.1),
-                          Color.fromARGB(255, 0, 0, 0).withOpacity(0.1),
-                          color!.withOpacity(0.1)
+                          Color.fromARGB(255, 0, 0, 0).withOpacity(0.5),
+                          Color.fromARGB(255, 0, 0, 0).withOpacity(0.9),
                         ])),
                     child: Container(
                       child: Column(
@@ -146,9 +152,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
                                   ),
                                 ),
                               );
-                            },
-                                fit: BoxFit.cover,
-                                '${playlist!.images!.first.url}'),
+                            }, fit: BoxFit.cover, '${imageUrl}'),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(
@@ -160,7 +164,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${playlist!.owner!.displayName}',
+                                    '${_getName(trackInfo)}',
                                     style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold),
@@ -174,13 +178,13 @@ class _PlayListMusicState extends State<PlayListMusic> {
                                         radius: 15,
                                         backgroundColor: Colors.blue,
                                         child: Text(
-                                            '${playlist.owner!.displayName![0]}'),
+                                            '${_getOwnerInicial(trackInfo)}'),
                                       ),
                                       const SizedBox(
                                         width: 10,
                                       ),
                                       Text(
-                                        '${playlist!.owner!.displayName}',
+                                        '${_getOwner(trackInfo)}',
                                         style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold),
@@ -241,10 +245,10 @@ class _PlayListMusicState extends State<PlayListMusic> {
                     color: Colors.black,
                     height: 700,
                     child: ListView.builder(
-                      itemCount: playlist?.tracks!.items!.length ?? 0,
+                      itemCount: list!.length ?? 0,
                       itemBuilder: (context, index) {
-                        final Track track =
-                            playlist!.tracks!.items![index]!.track!;
+                        final Track track = list![index]!;
+
                         return GestureDetector(
                           onTap: () {
                             Provider.of<CurrentIndexMusicState>(context,
@@ -301,10 +305,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
                       AnimatedOpacity(
                         duration: Duration(milliseconds: 250),
                         opacity: showTopBar ? 1 : 0,
-                        child: Text(
-                          '${playlist.name}',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
+                        child: Image.network(imageUrl),
                       ),
                     ],
                   ),
@@ -316,4 +317,37 @@ class _PlayListMusicState extends State<PlayListMusic> {
       ),
     );
   }
+}
+
+String? _getName(Object object) {
+  if (object is spoti.Track) return object.name;
+  if (object is spoti.AlbumSimple) return object.name;
+  if (object is spoti.Playlist) return object.name;
+  if (object is Playlist) return object.name;
+  if (object is spoti.PlaylistSimple) return object.name;
+  return null;
+}
+
+String? _getOwner(Object object) {
+  if (object is spoti.Track) return object.artists?.first?.name;
+  if (object is spoti.AlbumSimple) return object.artists?.first?.name;
+  if (object is spoti.Playlist) return object.owner?.displayName;
+  if (object is Playlist) return object.owner?.displayName;
+  if (object is spoti.PlaylistSimple) return object.owner?.displayName;
+
+  return null;
+}
+
+String? _getOwnerInicial(Object object) {
+  if (object is spoti.Track)
+    return object.artists?.first?.name?.substring(0, 1);
+  if (object is spoti.AlbumSimple)
+    return object.artists?.first?.name?.substring(0, 1);
+  if (object is spoti.Playlist)
+    return object.owner?.displayName?.substring(0, 1);
+  if (object is spoti.PlaylistSimple)
+    return object.owner?.displayName?.substring(0, 1);
+  if (object is Playlist) return object.owner?.displayName?.substring(0, 1);
+
+  return null;
 }

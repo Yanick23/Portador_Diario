@@ -38,7 +38,6 @@ class _MainScreenState extends State<MainScreen> {
     _controller = DraggableScrollableController()
       ..addListener(() {
         setState(() {
-          SearchService().aaa();
           if (_controller.size >= 0.2) {
             showBarPlay = false;
             _navBarOpacity = 0.0; // Esconder a barra de navegação
@@ -171,7 +170,6 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () => {
                 Provider.of<PageState>(context, listen: false)
                     .updateSelectedPage(targetPage),
-                SearchService().aaa()
               },
             ),
           ),

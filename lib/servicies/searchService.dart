@@ -1,84 +1,75 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:spotify/spotify.dart';
+import 'package:spoti_stream_music/models/modelsData.dart' as model;
 
 class SearchService {
-  Future<void> aaa() async {
-    var credentials = SpotifyApiCredentials(
-        'cac81364fb3c4160815b48280446612e', 'd12dd157d54342759fe55340b8354e80');
-    var spotify = SpotifyApi(credentials);
-    Playlist().tracks!.itemsNative!.forEach(
-          (element) {},
-        );
-    print("\nSearching for 'Metallica':");
-    var search = await spotify.search.get('metallica').first();
+  final SpotifyApi _spotifyApi;
 
-    for (var pages in search) {
-      if (pages.items == null) {
-        print('Empty items');
-      }
+  SearchService(String clientId, String clientSecret)
+      : _spotifyApi = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret));
+  Future<List<model.Track>?> albumsTracks(String albumId) async {
+    try {
+      var tracks = await _spotifyApi.albums.tracks(albumId).all();
+      return tracks.map((e) => model.Track.fromJson(e.toJson())).toList();
+    } catch (e) {
+      print('Error fetching album tracks: $e');
+      return null;
+    }
+  }
 
-      for (var item in pages.items!) {
-        if (item is PlaylistSimple) {
-          print('Playlist: \n'
-              'id: ${item.id}\n'
-              'name: ${item.name}:\n'
-              'collaborative: ${item.collaborative}\n '
-              'href: ${item.href}\n'
-              'trackslink: ${item.tracksLink!.href}\n'
-              'owner: ${item.owner}\n'
-              'public: ${item.owner}\n'
-              'snapshotId: ${item.snapshotId}\n'
-              'type: ${item.type}\n'
-              'uri: ${item.uri}\n'
-              'images: ${item.images!.length}\n'
-              'images: ${item}\n'
-              '-------------------------------');
-        }
-        if (item is Artist) {
-          print('Artist: \n'
-              'id: ${item.id}\n'
-              'name: ${item.name}\n'
-              'href: ${item.href}\n'
-              'type: ${item.type}\n'
-              'uri: ${item.uri}\n'
-              'popularity: ${item.popularity}\n'
-              '-------------------------------');
-        }
-        if (item is Track) {
-          print('Track:\n'
-              'id: ${item.id}\n'
-              'name: ${item.name}\n'
-              'href: ${item.href}\n'
-              'type: ${item.type}\n'
-              'uri: ${item.uri}\n'
-              'isPlayable: ${item.isPlayable}\n'
-              'artists: ${item.artists!.length}\n'
-              'availableMarkets: ${item.availableMarkets!.length}\n'
-              'discNumber: ${item.discNumber}\n'
-              'trackNumber: ${item.trackNumber}\n'
-              'explicit: ${item.explicit}\n'
-              'popularity: ${item.popularity}\n'
-              '-------------------------------');
-        }
-        if (item is AlbumSimple) {
-          print('Album:\n'
-              'id: ${item.id}\n'
-              'name: ${item.name}\n'
-              'href: ${item.href}\n'
-              'type: ${item.type}\n'
-              'uri: ${item.uri}\n'
-              'albumType: ${item.albumType}\n'
-              'artists: ${item.artists!.length}\n'
-              'availableMarkets: ${item.availableMarkets!.length}\n'
-              'images: ${item.images!.length}\n'
-              'releaseDate: ${item.releaseDate}\n'
-              'releaseDatePrecision: ${item.releaseDatePrecision}\n'
-              '-------------------------------');
+  Future<List<model.Track>?> playListTrack(String playListId) async {
+    try {
+      var tracks =
+          await _spotifyApi.playlists.getTracksByPlaylistId(playListId).all();
+      return tracks.map((e) => model.Track.fromJson(e.toJson())).toList();
+    } catch (e) {
+      print('Error fetching playlist tracks: $e');
+      return null;
+    }
+  }
+
+  Future<List<Object>> search(String query) async {
+    var results = await _spotifyApi.search.get(query).first();
+
+    List<Object> searchResults = [];
+
+    for (var page in results) {
+      if (page.items != null) {
+        for (var item in page.items!) {
+          if (item is PlaylistSimple) {
+            searchResults.add(PlaylistSimple.fromJson(item.toJson()));
+          } else if (item is Artist) {
+            searchResults.add(Artist.fromJson(item.toJson()));
+          } else if (item is Track) {
+            searchResults.add(Track.fromJson(item.toJson()));
+          } else if (item is AlbumSimple) {
+            searchResults.add(AlbumSimple.fromJson(item.toJson()));
+          }
         }
       }
     }
+    return searchResults;
+  }
+}
+
+class SearchResult {
+  final String type;
+  final String id;
+  final String name;
+  final String href;
+  final List<Image>? images;
+  final Map<String, dynamic> additionalInfo;
+
+  SearchResult({
+    required this.type,
+    required this.id,
+    required this.name,
+    required this.href,
+    this.images,
+    this.additionalInfo = const {},
+  });
+
+  @override
+  String toString() {
+    return 'Type: $type\nID: $id\nName: $name\nHref: $href\nImages: ${images?.length ?? 0}\nAdditional Info: $additionalInfo\n';
   }
 }

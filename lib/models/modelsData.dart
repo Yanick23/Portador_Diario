@@ -104,6 +104,24 @@ class Track {
     data['uri'] = this.uri;
     return data;
   }
+
+  Track.fromData(Track track) {
+    album = track.album != null ? Album.fromData(track.album!) : null;
+    artists = track.artists?.map((e) => Artists.fromData(e)).toList();
+    availableMarkets = track.availableMarkets;
+    discNumber = track.discNumber;
+    durationMs = track.durationMs;
+    explicit = track.explicit;
+    href = track.href;
+    id = track.id;
+    isLocal = track.isLocal;
+    name = track.name;
+    popularity = track.popularity;
+    previewUrl = track.previewUrl;
+    trackNumber = track.trackNumber;
+    type = track.type;
+    uri = track.uri;
+  }
 }
 
 class Album {
@@ -187,6 +205,21 @@ class Album {
     data['uri'] = this.uri;
     return data;
   }
+
+  Album.fromData(Album album) {
+    albumType = album.albumType;
+    artists = album.artists?.map((e) => Artists.fromData(e)).toList();
+    availableMarkets = album.availableMarkets;
+    href = album.href;
+    id = album.id;
+    images = album.images?.map((e) => Images.fromData(e)).toList();
+    name = album.name;
+    releaseDate = album.releaseDate;
+    releaseDatePrecision = album.releaseDatePrecision;
+    totalTracks = album.totalTracks;
+    type = album.type;
+    uri = album.uri;
+  }
 }
 
 class Artists {
@@ -240,6 +273,15 @@ class Artists {
     }
     return data;
   }
+
+  Artists.fromData(Artists artist) {
+    href = artist.href;
+    id = artist.id;
+    name = artist.name;
+    type = artist.type;
+    uri = artist.uri;
+    images = artist.images?.map((e) => Images.fromData(e)).toList();
+  }
 }
 
 class ExternalUrls {
@@ -269,6 +311,11 @@ class Images {
     height = json['height'];
     url = json['url'];
     width = json['width'];
+  }
+  Images.fromData(Images image) {
+    height = image.height;
+    url = image.url;
+    width = image.width;
   }
 
   Map<String, dynamic> toJson() {

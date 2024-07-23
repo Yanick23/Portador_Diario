@@ -72,13 +72,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
     super.didChangeDependencies();
     track = Provider.of<CurrentIndexMusicState>(context, listen: false)
         .currentIndexMusic;
-    trackm.Playlist playlist =
-        Provider.of<PlaylistState>(context, listen: false).getPlaylist!;
+    late List<listMusix.Track> tracks =
+        Provider.of<PlaylistState>(context, listen: false).getTrackList!;
 
     setState(() {
       a = [];
-      playlist.tracks!.items!.forEach((element) {
-        a.add(element!.track!);
+      tracks!.forEach((element) {
+        a.add(element!);
       });
     });
 
@@ -204,7 +204,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
                 padding: const EdgeInsets.symmetric(horizontal: 26),
                 child: Column(
                   children: [
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
+import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/servicies/playListService.dart';
 import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
 
@@ -55,12 +57,21 @@ class _PlaylistscreenState extends State<Playlistscreen> {
           itemCount: _playlists.length,
           itemBuilder: (context, index) {
             final playlist = _playlists[index];
+            final tracks = playlist.tracks?.items
+                    ?.map((e) => Track.fromData(e.track!))
+                    .toList() ??
+                [];
+
             return GestureDetector(
               onTap: () {
+                Provider.of<TypereproducerState>(context, listen: false)
+                    .updatePlayMusicBarState(playlist);
                 Provider.of<PageState>(context, listen: false)
                     .updateSelectedPage(6);
                 Provider.of<PlaylistState>(context, listen: false)
-                    .updatePlaylist(playlist);
+                    .updateTrackList(tracks);
+                Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
+                    .updateImageUrl(_playlists[index]!.images!.first!.url!);
               },
               child: CardplayListInfo(
                 playlistinfo: _playlists[index],

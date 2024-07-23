@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
 
 class PlaylistState with ChangeNotifier {
-  Playlist? _playlist = Playlist();
+  List<Track> _trackList = [];
 
-  Playlist? get getPlaylist => _playlist;
+  List<Track> get getTrackList => _trackList;
 
-  void updatePlaylist(Playlist playlist) {
-    _playlist = playlist;
+  void updateTrackList(List<Track>? trackList) {
+    _trackList = trackList!;
 
     notifyListeners();
   }
