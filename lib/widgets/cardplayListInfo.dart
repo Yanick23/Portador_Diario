@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/modelsData.dart' as playlist;
+import 'package:spoti_stream_music/models/modelsData.dart' as play;
 
 class CardplayListInfo extends StatelessWidget {
-  final playlist.Playlista playlistinfo;
+  final play.Playlist playlistinfo;
   const CardplayListInfo({super.key, required this.playlistinfo});
 
   @override

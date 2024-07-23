@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
+import 'package:spoti_stream_music/providers/playListState.dart';
 import 'package:spoti_stream_music/servicies/playListService.dart';
 import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
 
@@ -12,13 +13,13 @@ class Playlistscreen extends StatefulWidget {
 }
 
 class _PlaylistscreenState extends State<Playlistscreen> {
-  late Playlista? playlist1 = PlaylistService().getPlayList();
-  final List<Playlista?> _playlists = [];
+  late Playlist? playlist1 = PlaylistService().getPlayList();
+  final List<Playlist> _playlists = [];
 
   @override
   void initState() {
     setState(() {
-      _playlists.add(playlist1);
+      _playlists.add(playlist1!);
     });
     super.initState();
   }
@@ -58,9 +59,11 @@ class _PlaylistscreenState extends State<Playlistscreen> {
               onTap: () {
                 Provider.of<PageState>(context, listen: false)
                     .updateSelectedPage(6);
+                Provider.of<PlaylistState>(context, listen: false)
+                    .updatePlaylist(playlist);
               },
               child: CardplayListInfo(
-                playlistinfo: _playlists[index]!,
+                playlistinfo: _playlists[index],
               ),
             );
           },

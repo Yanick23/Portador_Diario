@@ -6,12 +6,12 @@ import 'package:spotify/spotify.dart';
 
 class SearchService {
   Future<void> aaa() async {
-    var keyJson = await File('example/.apikeys').readAsString();
-    var keyMap = json.decode(keyJson);
-
-    var credentials = SpotifyApiCredentials(keyMap['id'], keyMap['secret']);
+    var credentials = SpotifyApiCredentials(
+        'cac81364fb3c4160815b48280446612e', 'd12dd157d54342759fe55340b8354e80');
     var spotify = SpotifyApi(credentials);
-
+    Playlist().tracks!.itemsNative!.forEach(
+          (element) {},
+        );
     print("\nSearching for 'Metallica':");
     var search = await spotify.search.get('metallica').first();
 
@@ -25,7 +25,7 @@ class SearchService {
           print('Playlist: \n'
               'id: ${item.id}\n'
               'name: ${item.name}:\n'
-              'collaborative: ${item.collaborative}\n'
+              'collaborative: ${item.collaborative}\n '
               'href: ${item.href}\n'
               'trackslink: ${item.tracksLink!.href}\n'
               'owner: ${item.owner}\n'
@@ -34,6 +34,7 @@ class SearchService {
               'type: ${item.type}\n'
               'uri: ${item.uri}\n'
               'images: ${item.images!.length}\n'
+              'images: ${item}\n'
               '-------------------------------');
         }
         if (item is Artist) {

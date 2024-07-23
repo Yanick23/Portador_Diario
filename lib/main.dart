@@ -2,15 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/pages/mainScreen.dart';
 import 'package:spoti_stream_music/pages/playLIstScreen.dart';
+import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
+import 'package:spoti_stream_music/providers/playListState.dart';
+import 'package:spoti_stream_music/providers/playMusicBarState.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => PageState(),
-      child: MyApp(),
-    ),
-  );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(
+        create: (context) => PageState(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => PlaylistState(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => CurrentIndexMusicState(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => PlayMusicBarState(),
+      )
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

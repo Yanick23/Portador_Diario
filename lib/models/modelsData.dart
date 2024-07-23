@@ -1,9 +1,11 @@
-class Playlistainfo {
+import 'package:spotify/spotify.dart';
+
+class Playlistinfo {
   late String nome;
   late String criador;
   late String image;
 
-  Playlistainfo(this.nome, this.criador, this.image);
+  Playlistinfo(this.nome, this.criador, this.image);
 }
 
 class Track {
@@ -354,7 +356,7 @@ class Owner {
   }
 }
 
-class Playlista {
+class Playlist {
   bool? collaborative;
   String? description;
   ExternalUrls? externalUrls;
@@ -371,7 +373,7 @@ class Playlista {
   String? uri;
   Null? primaryColor;
 
-  Playlista(
+  Playlist(
       {this.collaborative,
       this.description,
       this.externalUrls,
@@ -388,7 +390,7 @@ class Playlista {
       this.uri,
       this.primaryColor});
 
-  Playlista.fromJson(Map<String, dynamic> json) {
+  Playlist.fromJson(Map<String, dynamic> json) {
     collaborative = json['collaborative'];
     description = json['description'];
     externalUrls = json['external_urls'] != null

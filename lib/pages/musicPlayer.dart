@@ -1,17 +1,24 @@
+import 'dart:async';
 import 'dart:ffi';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:audioplayers/audioplayers.dart';
+
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart' as trackm;
 import 'package:spoti_stream_music/models/modelsData.dart' as listMusix;
+import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
+import 'package:spoti_stream_music/providers/playListState.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class MusicPlayer extends StatefulWidget {
-  final int? track;
-  final List<listMusix.Track> lista;
-  const MusicPlayer({super.key, this.track, required this.lista});
+  final bool showBarPlay;
+
+  const MusicPlayer({super.key, required this.showBarPlay});
 
   @override
   State<MusicPlayer> createState() => _MusicPlayerState();
@@ -24,21 +31,70 @@ class _MusicPlayerState extends State<MusicPlayer> {
   bool isLoading = true;
   late AudioPlayer player;
   late List<listMusix.Track> a;
+  late List<AudioSource> children;
+
+  Widget _buildPlayingBar(listMusix.Track? currentTrack, TextTheme textTheme) {
+    return Container(
+      height: 70,
+      child: ListTile(
+        leading: GestureDetector(
+          onTap: () async {
+            if (isPlaying) {
+              await player.pause();
+            } else {
+              await player.play();
+            }
+            setState(() {
+              isPlaying = !isPlaying;
+            });
+          },
+          child: Icon(
+            isPlaying ? Icons.pause_sharp : Icons.play_arrow,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+        title: Text(
+          currentTrack?.name ?? '',
+          style: TextStyle(fontSize: 12),
+        ),
+        subtitle: Text(
+          currentTrack?.artists?.map((e) => e.name).join(', ') ?? '',
+          style: TextStyle(fontSize: 12),
+        ),
+        trailing: Icon(Icons.favorite),
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    track = Provider.of<CurrentIndexMusicState>(context, listen: false)
+        .currentIndexMusic;
+    trackm.Playlist playlist =
+        Provider.of<PlaylistState>(context, listen: false).getPlaylist!;
+
+    setState(() {
+      a = [];
+      playlist.tracks!.items!.forEach((element) {
+        a.add(element!.track!);
+      });
+    });
+
+    if (track != null) {
+      _initializeTrack();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     player = AudioPlayer();
-    track = widget.track;
-    a = widget.lista;
 
     if (track != null) {
       _initializeTrack();
     }
-
-    player.onPlayerComplete.listen((event) {
-      _nextTrack();
-    });
   }
 
   Future<void> PlayMusic(String text) async {
@@ -50,11 +106,13 @@ class _MusicPlayerState extends State<MusicPlayer> {
     var audioUrl = manifest.audioOnly.last.url;
     print(audioUrl.toString());
 
+    await player.setUrl(audioUrl.toString());
+    await player.play();
     setState(() {
-      isPlaying = true;
+      isPlaying = player.playerState.playing;
+      ;
       duration = video.duration!;
     });
-    await player.play(UrlSource(audioUrl.toString()));
   }
 
   late Color? color = Colors.black;
@@ -116,9 +174,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   }
 
   void _nextTrack() {
-    if (track! + 1 < a.length) {
-      _changeMusic(track! + 1);
-    }
+    _changeMusic(track! + 1);
   }
 
   void _previousTrack() {
@@ -136,147 +192,160 @@ class _MusicPlayerState extends State<MusicPlayer> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    track = Provider.of<CurrentIndexMusicState>(context).currentIndexMusic;
     var currentTrack = a[track!];
 
     return Scaffold(
       backgroundColor: color!,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 26),
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.close,
-                    color: Colors.transparent,
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 4),
-                          Text(
-                            currentTrack.artists?.first.name ?? "",
-                            style: textTheme.bodyLarge
-                                ?.copyWith(color: Colors.white),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                  const Icon(Icons.close, color: Colors.white),
-                ],
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                  child: isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(
-                          color: Colors.blue,
-                        ))
-                      : ArtWorkImage(
-                          image: currentTrack.album!.images!.first!.url,
-                        ),
-                ),
-              ),
-              Expanded(
+      body: widget.showBarPlay
+          ? _buildPlayingBar(currentTrack, textTheme)
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 26),
                 child: Column(
                   children: [
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Icon(
+                          Icons.close,
+                          color: Colors.transparent,
+                        ),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              currentTrack.name ?? '',
-                              style: textTheme.titleLarge
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                            Text(
-                              currentTrack.artists!.first.name ?? '-',
-                              style: textTheme.titleMedium
-                                  ?.copyWith(color: Colors.white60),
-                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(width: 4),
+                                Text(
+                                  currentTrack.artists?.first.name ?? "",
+                                  style: textTheme.bodyLarge
+                                      ?.copyWith(color: Colors.white),
+                                )
+                              ],
+                            )
                           ],
                         ),
-                        const Icon(
-                          Icons.favorite,
-                          color: CustomColors.primaryColor,
-                        )
+                        const Icon(Icons.close, color: Colors.white),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    StreamBuilder<Duration>(
-                        stream: player.onPositionChanged,
-                        builder: (context, snapshot) {
-                          return ProgressBar(
-                            progress:
-                                snapshot.data ?? const Duration(seconds: 0),
-                            total: duration ?? const Duration(minutes: 4),
-                            bufferedBarColor: Colors.white38,
-                            baseBarColor: Colors.white10,
-                            thumbColor: Colors.white,
-                            timeLabelTextStyle:
-                                const TextStyle(color: Colors.white),
-                            progressBarColor: Colors.white,
-                            onSeek: (duration) {
-                              player.seek(duration);
-                            },
-                          );
-                        }),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            _previousTrack();
-                          },
-                          icon: const Icon(Icons.skip_previous,
-                              color: Colors.white, size: 36),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            if (isPlaying) {
-                              await player.pause();
-                            } else {
-                              await player.resume();
-                            }
-                            setState(() {
-                              isPlaying = !isPlaying;
-                            });
-                          },
-                          icon: Icon(
-                            isPlaying ? Icons.pause_sharp : Icons.play_arrow,
-                            color: Colors.white,
-                            size: 60,
+                    Expanded(
+                      flex: 2,
+                      child: Center(
+                        child: isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                color: Colors.blue,
+                              ))
+                            : ArtWorkImage(
+                                image: currentTrack.album!.images!.first!.url,
+                              ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentTrack.name ?? '',
+                                    style: textTheme.titleLarge
+                                        ?.copyWith(color: Colors.white),
+                                  ),
+                                  Text(
+                                    currentTrack.artists!.first.name ?? '-',
+                                    style: textTheme.titleMedium
+                                        ?.copyWith(color: Colors.white60),
+                                  ),
+                                ],
+                              ),
+                              const Icon(
+                                Icons.favorite,
+                                color: CustomColors.primaryColor,
+                              )
+                            ],
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            _nextTrack();
-                          },
-                          icon: const Icon(Icons.skip_next,
-                              color: Colors.white, size: 36),
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          StreamBuilder<Duration>(
+                              stream: player.positionStream,
+                              builder: (context, snapshot) {
+                                final position = snapshot.data ?? Duration.zero;
+                                return Column(
+                                  children: [
+                                    ProgressBar(
+                                      progress: position,
+                                      total: player.duration ??
+                                          const Duration(minutes: 4),
+                                      bufferedBarColor: Colors.white38,
+                                      buffered: player.bufferedPosition ??
+                                          Duration.zero,
+                                      baseBarColor: Colors.white10,
+                                      thumbColor: Colors.white,
+                                      timeLabelTextStyle:
+                                          const TextStyle(color: Colors.white),
+                                      progressBarColor: Colors.white,
+                                      onSeek: (duration) {
+                                        player.seek(duration);
+                                      },
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            _previousTrack();
+                                          },
+                                          icon: const Icon(Icons.skip_previous,
+                                              color: Colors.white, size: 36),
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            if (isPlaying) {
+                                              await player.pause();
+                                            } else {
+                                              await player.play();
+                                            }
+                                            setState(() {
+                                              isPlaying = !isPlaying;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            isPlaying
+                                                ? Icons.pause_sharp
+                                                : Icons.play_arrow,
+                                            color: Colors.white,
+                                            size: 60,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {
+                                            _nextTrack();
+                                          },
+                                          icon: const Icon(Icons.skip_next,
+                                              color: Colors.white, size: 36),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                );
+                              }),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     )
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 }
@@ -323,4 +392,12 @@ Future<Color?> getImagePalette(ImageProvider imageProvider) async {
 
 class CustomColors {
   static const Color primaryColor = Colors.red;
+}
+
+class PositionData {
+  const PositionData(this.position, this.bufferedPosition, this.duration);
+
+  final Duration position;
+  final Duration bufferedPosition;
+  final Duration duration;
 }
