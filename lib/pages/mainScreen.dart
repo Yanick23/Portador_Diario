@@ -40,10 +40,10 @@ class _MainScreenState extends State<MainScreen> {
         setState(() {
           if (_controller.size >= 0.2) {
             showBarPlay = false;
-            _navBarOpacity = 0.0; // Esconder a barra de navegação
+            _navBarOpacity = 0.0;
           } else {
             showBarPlay = true;
-            _navBarOpacity = 1.0; // Mostrar a barra de navegação
+            _navBarOpacity = 1.0;
           }
         });
       });

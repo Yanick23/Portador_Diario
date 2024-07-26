@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spoti_stream_music/servicies/ArtistService.dart';
 import 'package:spoti_stream_music/widgets/CardPlayList.dart';
 import 'package:spoti_stream_music/widgets/cardArtistaFavorito.dart';
 
@@ -13,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      backgroundColor: const Color.fromARGB(255, 24, 24, 23),
       body: SingleChildScrollView(
         child: Container(
           child: Column(
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       "Musica",
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     Row(
                       children: [
@@ -49,35 +50,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 8),
-                child: const Text("Os seus artistas preferidos",
+                child: const Text("Os seus artistas favoritos",
                     style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               ),
               Container(
-                  height: 140,
+                  height: 250,
                   padding: const EdgeInsets.only(left: 8),
-                  child: ListView(
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(10),
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        children: [
+                          CardArtistaFavorito(
+                            artista:
+                                ArtistService().mostPopularArtist()![index],
+                          ),
+                          SizedBox(
+                            width: 30,
+                          )
+                        ],
+                      );
+                    },
                     scrollDirection: Axis.horizontal,
-                    children: const [
-                      CardArtistaFavorito(
-                        nome: "Azagaia",
-                      ),
-                      SizedBox(
-                        width: 30,
-                      ),
-                      CardArtistaFavorito(
-                        nome: "Hernani ",
-                      ),
-                      SizedBox(
-                        width: 30,
-                      ),
-                      CardArtistaFavorito(
-                        nome: "J. Cole",
-                      ),
-                    ],
                   )),
               Container(
                 alignment: Alignment.centerLeft,

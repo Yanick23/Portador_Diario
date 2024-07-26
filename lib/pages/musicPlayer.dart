@@ -1,16 +1,15 @@
 import 'dart:async';
-import 'dart:ffi';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_infinite_marquee/flutter_infinite_marquee.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/models/modelsData.dart' as trackm;
+
 import 'package:spoti_stream_music/models/modelsData.dart' as listMusix;
+import 'package:spoti_stream_music/providers/audioPlayerProvider.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -31,7 +30,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
   bool isLoading = true;
   late AudioPlayer player;
   late List<listMusix.Track> a;
-  late List<AudioSource> children;
 
   Widget _buildPlayingBar(listMusix.Track? currentTrack, TextTheme textTheme) {
     return Container(
@@ -58,10 +56,30 @@ class _MusicPlayerState extends State<MusicPlayer> {
           currentTrack?.name ?? '',
           style: TextStyle(fontSize: 12),
         ),
-        subtitle: Text(
-          currentTrack?.artists?.map((e) => e.name).join(', ') ?? '',
-          style: TextStyle(fontSize: 12),
-        ),
+        subtitle:
+            currentTrack?.artists != null && currentTrack!.artists!.isNotEmpty
+                ? Container(
+                    height: 20,
+                    child: currentTrack.artists!.length > 1
+                        ? InfiniteMarquee(
+                            frequency: Duration(milliseconds: 30),
+                            initialScrollOffset: 0,
+                            scrollDirection: Axis.horizontal,
+                            separatorBuilder: (context, index) {
+                              return Text(', ');
+                            },
+                            itemBuilder: (context, index) {
+                              return Text(
+                                  '${currentTrack.artists![index % currentTrack.artists!.length].name}');
+                            },
+                          )
+                        : currentTrack.artists!.length == 1
+                            ? Text('${currentTrack.artists![0].name}')
+                            : null)
+                : Text(
+                    '${currentTrack!.artists![0].name}',
+                    style: TextStyle(fontSize: 12, color: Colors.white),
+                  ),
         trailing: Icon(Icons.favorite),
       ),
     );
@@ -104,7 +122,6 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
     var manifest = await yt.videos.streamsClient.getManifest(videoId);
     var audioUrl = manifest.audioOnly.last.url;
-    print(audioUrl.toString());
 
     await player.setUrl(audioUrl.toString());
     await player.play();
@@ -193,8 +210,11 @@ class _MusicPlayerState extends State<MusicPlayer> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     track = Provider.of<CurrentIndexMusicState>(context).currentIndexMusic;
-    var currentTrack = a[track!];
 
+    var currentTrack = a[track!];
+    print('quantidade - ${a.length}');
+
+    print(currentTrack.name);
     return Scaffold(
       backgroundColor: color!,
       body: widget.showBarPlay

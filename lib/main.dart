@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/pages/mainScreen.dart';
 import 'package:spoti_stream_music/pages/playLIstScreen.dart';
+import 'package:spoti_stream_music/providers/audioPlayerProvider.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
@@ -29,6 +30,9 @@ void main() {
       ),
       ChangeNotifierProvider(
         create: (context) => TypereproducerState(),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => AudioPLayerProvider(),
       )
     ],
     child: const MyApp(),

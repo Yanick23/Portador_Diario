@@ -327,12 +327,11 @@ class _SearchScreenState extends State<SearchScreen> {
   void _handleAlbumTap(
       BuildContext context, spoti.AlbumSimple albumSimple) async {
     final List<Track>? tracks =
-        await _searchService.albumsTracks(albumSimple!.id!);
-    final bf = tracks?.map((e) => Track.fromData(e)).toList() ?? [];
+        await _searchService.albumsTracks(albumSimple.id!);
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
-        .updateImageUrl(albumSimple!.images!.first!.url!);
-    Provider.of<PlaylistState>(context, listen: false).updateTrackList(bf);
+        .updateImageUrl(albumSimple.images!.first!.url!);
+    Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
         .updatePlayMusicBarState(albumSimple);
   }
@@ -341,7 +340,7 @@ class _SearchScreenState extends State<SearchScreen> {
       BuildContext context, spoti.PlaylistSimple playlist) async {
     final List<Track>? tracks =
         await _searchService.playListTrack(playlist.id!);
-
+    final bf = tracks?.map((e) => print(e.name)).toList() ?? [];
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(playlist.images!.first!.url!);

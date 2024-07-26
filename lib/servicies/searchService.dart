@@ -7,9 +7,16 @@ class SearchService {
   SearchService(String clientId, String clientSecret)
       : _spotifyApi = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret));
   Future<List<model.Track>?> albumsTracks(String albumId) async {
+    List<model.Track> ll = [];
     try {
       var tracks = await _spotifyApi.albums.tracks(albumId).all();
-      return tracks.map((e) => model.Track.fromJson(e.toJson())).toList();
+      tracks.forEach(
+        (element) {
+          ll.add(model.Track.fromJson(element.toJson()));
+        },
+      );
+
+      return ll;
     } catch (e) {
       print('Error fetching album tracks: $e');
       return null;
