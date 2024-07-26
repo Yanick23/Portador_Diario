@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/pages/SearchScreen.dart';
+import 'package:spoti_stream_music/pages/artistPage.dart';
 import 'package:spoti_stream_music/pages/favoritoScreen.dart';
 import 'package:spoti_stream_music/pages/homeScreen.dart';
 import 'package:spoti_stream_music/pages/musicPlayer.dart';
@@ -30,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     const Favoritoscreen(),
     const Playlistscreen(),
     const PlayListMusic(),
+    const ArtistPage()
   ];
 
   @override

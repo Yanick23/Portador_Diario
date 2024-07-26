@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spoti_stream_music/pages/artistPage.dart';
+import 'package:spoti_stream_music/providers/artistsProvider.dart';
+import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/servicies/ArtistService.dart';
 import 'package:spoti_stream_music/widgets/CardPlayList.dart';
 import 'package:spoti_stream_music/widgets/cardArtistaFavorito.dart';
@@ -67,11 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.all(10),
                     itemCount: 10,
                     itemBuilder: (context, index) {
+                      var artists = ArtistService().mostPopularArtist()![index];
                       return Row(
                         children: [
-                          CardArtistaFavorito(
-                            artista:
-                                ArtistService().mostPopularArtist()![index],
+                          GestureDetector(
+                            onTap: () {
+                              Provider.of<ArtistProvider>(context,
+                                      listen: false)
+                                  .setAtistt(artists);
+                              Provider.of<PageState>(context, listen: false)
+                                  .updateSelectedPage(7);
+                            },
+                            child: CardArtistaFavorito(artista: artists),
                           ),
                           SizedBox(
                             width: 30,

@@ -141,7 +141,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
     try {
       var currentTrack = a[track!];
       await PlayMusic(
-          '${currentTrack.artists!.first.name} - ${currentTrack.name}');
+          '${currentTrack.artists!.first.name} - ${currentTrack.name} (audio)');
       String? tempSongName = currentTrack.name;
       if (tempSongName != null) {
         currentTrack.name = tempSongName;

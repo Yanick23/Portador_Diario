@@ -23,6 +23,20 @@ class SearchService {
     }
   }
 
+  Future<List<Track>?> top10TrackArtist(String idArtist) async {
+    List<Track> ll = [];
+
+    var tracks = await _spotifyApi.artists.topTracks(idArtist, Market.MZ);
+    tracks.forEach(
+      (element) {
+        print(element.name);
+        ll.add(Track.fromJson(element.toJson()));
+      },
+    );
+
+    return ll;
+  }
+
   Future<List<model.Track>?> playListTrack(String playListId) async {
     try {
       var tracks =
