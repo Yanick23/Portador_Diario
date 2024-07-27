@@ -267,14 +267,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
                         final Track track = list![index]!;
 
                         return GestureDetector(
-                          onTap: () {
-                            Provider.of<CurrentIndexMusicState>(context,
-                                    listen: false)
-                                .updateCurrentIndexMusic(index);
-                            Provider.of<PlayMusicBarState>(context,
-                                    listen: false)
-                                .updatePlayMusicBarState(true);
-                          },
+                          onTap: () {},
                           child: TrackCard(
                             image: track!.album!.images!.first.url!,
                             artista: track!.artists!.first.name!,

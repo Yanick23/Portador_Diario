@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 24, 24, 23),
+      backgroundColor: Color.fromARGB(255, 0, 0, 0),
       body: SingleChildScrollView(
         child: Container(
           child: Column(
@@ -71,18 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.all(10),
                     itemCount: 10,
                     itemBuilder: (context, index) {
-                      var artists = ArtistService().mostPopularArtist()![index];
+                      var artist = ArtistService().mostPopularArtist()![index];
                       return Row(
                         children: [
                           GestureDetector(
                             onTap: () {
                               Provider.of<ArtistProvider>(context,
                                       listen: false)
-                                  .setAtistt(artists);
+                                  .setAtistt(artist);
                               Provider.of<PageState>(context, listen: false)
                                   .updateSelectedPage(7);
                             },
-                            child: CardArtistaFavorito(artista: artists),
+                            child: CardArtistaFavorito(artista: artist),
                           ),
                           SizedBox(
                             width: 30,

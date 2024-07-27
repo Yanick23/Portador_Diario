@@ -30,8 +30,11 @@ class TrackCard extends StatelessWidget {
                   child: Icon(Icons.music_note)),
             ),
           ),
-          title: Text("${titulo}"),
+          title:
+              Text(maxLines: 1, overflow: TextOverflow.ellipsis, "${titulo}"),
           subtitle: Text(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             '${artista}',
             style: TextStyle(color: const Color.fromARGB(255, 188, 181, 181)),
           ),

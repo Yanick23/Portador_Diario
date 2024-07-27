@@ -28,7 +28,7 @@ class CardArtistaFavorito extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(20)),
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withOpacity(0.8),
+                  Color.fromARGB(255, 28, 27, 27).withOpacity(0.8),
                   Colors.transparent,
                 ],
                 begin: Alignment.bottomCenter,

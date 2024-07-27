@@ -23,13 +23,31 @@ class SearchService {
     }
   }
 
+  Future<List<Album>?> Discografia(String idArtist, List<String> lista) async {
+    List<Album> ll = [];
+
+    var tracks = await _spotifyApi.artists
+        .albums(idArtist, country: Market.MZ, includeGroups: lista);
+    tracks.first().then(
+      (value) {
+        value!.items!.forEach(
+          (element) {
+            print(element.name);
+            ll.add(element);
+          },
+        );
+      },
+    );
+
+    return ll;
+  }
+
   Future<List<Track>?> top10TrackArtist(String idArtist) async {
     List<Track> ll = [];
 
     var tracks = await _spotifyApi.artists.topTracks(idArtist, Market.MZ);
     tracks.forEach(
       (element) {
-        print(element.name);
         ll.add(Track.fromJson(element.toJson()));
       },
     );

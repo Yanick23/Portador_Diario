@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spoti_stream_music/providers/artistsProvider.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
@@ -264,6 +265,8 @@ class _SearchScreenState extends State<SearchScreen> {
               _handleAlbumTap(context, result);
             } else if (result is spoti.PlaylistSimple) {
               _handlePlayListTap(context, result);
+            } else if (result is spoti.Artist) {
+              _handleArtistTap(context, Artists.fromJson(result.toJson()));
             }
           },
         );
@@ -322,6 +325,11 @@ class _SearchScreenState extends State<SearchScreen> {
     Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
         .updatePlayMusicBarState(track);
+  }
+
+  void _handleArtistTap(BuildContext context, Artists artist) {
+    Provider.of<ArtistProvider>(context, listen: false).setAtistt(artist);
+    Provider.of<PageState>(context, listen: false).updateSelectedPage(7);
   }
 
   void _handleAlbumTap(
