@@ -8,7 +8,10 @@ import 'package:just_audio/just_audio.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
 
-import 'package:spoti_stream_music/models/modelsData.dart' as listMusix;
+import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
+import 'package:spoti_stream_music/providers/typeReproducer.dart';
+
+import 'package:spotify/spotify.dart' as listMusix;
 import 'package:spoti_stream_music/providers/audioPlayerProvider.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/playListState.dart';
@@ -30,6 +33,9 @@ class _MusicPlayerState extends State<MusicPlayer> {
   bool isLoading = true;
   late AudioPlayer player;
   late List<listMusix.Track> a;
+  late String imageUrl = '';
+
+  late Object trackInfo = Object();
 
   Widget _buildPlayingBar(listMusix.Track? currentTrack, TextTheme textTheme) {
     return Container(
@@ -92,6 +98,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
         .currentIndexMusic;
     late List<listMusix.Track> tracks =
         Provider.of<PlaylistState>(context, listen: false).getTrackList!;
+    imageUrl = Provider.of<ImagePlayListAndAlbumstate>(context).imageUrl;
+    trackInfo = Provider.of<TypereproducerState>(context).ObjecTypereproducer;
 
     setState(() {
       a = [];
@@ -149,6 +157,14 @@ class _MusicPlayerState extends State<MusicPlayer> {
         String? image = currentTrack.album?.images?.first.url;
         if (image != null) {
           final tempSongColor = await getImagePalette(NetworkImage(image));
+          if (tempSongColor != null) {
+            setState(() {
+              color = tempSongColor;
+              isLoading = false;
+            });
+          }
+        } else if (trackInfo is listMusix.AlbumSimple) {
+          final tempSongColor = await getImagePalette(NetworkImage(imageUrl));
           if (tempSongColor != null) {
             setState(() {
               color = tempSongColor;
@@ -261,9 +277,14 @@ class _MusicPlayerState extends State<MusicPlayer> {
                                 child: CircularProgressIndicator(
                                 color: Colors.blue,
                               ))
-                            : ArtWorkImage(
-                                image: currentTrack.album!.images!.first!.url,
-                              ),
+                            : trackInfo is listMusix.AlbumSimple
+                                ? ArtWorkImage(
+                                    image: imageUrl,
+                                  )
+                                : ArtWorkImage(
+                                    image:
+                                        currentTrack.album!.images!.first!.url,
+                                  ),
                       ),
                     ),
                     Expanded(

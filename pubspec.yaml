@@ -49,6 +49,7 @@ dependencies:
   audio_service: ^0.18.14
   shared_preferences: ^2.2.3
   flutter_infinite_marquee: ^1.0.0
+  rxdart: ^0.28.0
  
   
 

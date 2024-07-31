@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spotify/spotify.dart';
 
 class CardArtistaFavorito extends StatelessWidget {
   const CardArtistaFavorito({
@@ -7,7 +7,7 @@ class CardArtistaFavorito extends StatelessWidget {
     required this.artista,
   });
 
-  final Artists artista;
+  final Artist artista;
 
   @override
   Widget build(BuildContext context) {

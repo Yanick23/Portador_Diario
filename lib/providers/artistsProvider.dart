@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spotify/spotify.dart';
 
 class ArtistProvider with ChangeNotifier {
-  late Artists _artista;
+  late Artist _artista;
 
-  Artists get artista => _artista;
+  Artist get artista => _artista;
 
-  void setAtistt(Artists artists) {
+  void setAtistt(Artist artists) {
     _artista = artists;
     notifyListeners();
   }

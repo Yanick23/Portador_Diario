@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/pages/musicPlayer.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
@@ -27,7 +27,7 @@ class _PlayListMusicState extends State<PlayListMusic> {
   bool showTopBar = false;
   late Color? color = Colors.black;
   late bool _isLoading = true;
-  late List<Track> list = [];
+  late List<spoti.Track> list = [];
   late String imageUrl = '';
 
   late Object trackInfo = Object();
@@ -264,12 +264,24 @@ class _PlayListMusicState extends State<PlayListMusic> {
                     child: ListView.builder(
                       itemCount: list!.length ?? 0,
                       itemBuilder: (context, index) {
-                        final Track track = list![index]!;
+                        final spoti.Track track = list![index]!;
 
                         return GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            print('object');
+                            Provider.of<PlaylistState>(context, listen: false)
+                                .updateTrackList(list);
+                            Provider.of<CurrentIndexMusicState>(context,
+                                    listen: false)
+                                .updateCurrentIndexMusic(index);
+                            Provider.of<PlayMusicBarState>(context,
+                                    listen: false)
+                                .updatePlayMusicBarState(true);
+                          },
                           child: TrackCard(
-                            image: track!.album!.images!.first.url!,
+                            image: trackInfo is spoti.AlbumSimple
+                                ? imageUrl
+                                : track!.album!.images!.first.url!,
                             artista: track!.artists!.first.name!,
                             titulo: track!.name!,
                           ),
@@ -333,7 +345,7 @@ String? _getName(Object object) {
   if (object is spoti.Track) return object.name;
   if (object is spoti.AlbumSimple) return object.name;
   if (object is spoti.Playlist) return object.name;
-  if (object is Playlist) return object.name;
+  if (object is spoti.Playlist) return object.name;
   if (object is spoti.PlaylistSimple) return object.name;
   return null;
 }
@@ -342,7 +354,7 @@ String? _getOwner(Object object) {
   if (object is spoti.Track) return object.artists?.first?.name;
   if (object is spoti.AlbumSimple) return object.artists?.first?.name;
   if (object is spoti.Playlist) return object.owner?.displayName;
-  if (object is Playlist) return object.owner?.displayName;
+  if (object is spoti.Playlist) return object.owner?.displayName;
   if (object is spoti.PlaylistSimple) return object.owner?.displayName;
 
   return null;
@@ -357,7 +369,8 @@ String? _getOwnerInicial(Object object) {
     return object.owner?.displayName?.substring(0, 1);
   if (object is spoti.PlaylistSimple)
     return object.owner?.displayName?.substring(0, 1);
-  if (object is Playlist) return object.owner?.displayName?.substring(0, 1);
+  if (object is spoti.Playlist)
+    return object.owner?.displayName?.substring(0, 1);
 
   return null;
 }

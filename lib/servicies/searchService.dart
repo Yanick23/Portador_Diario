@@ -6,13 +6,13 @@ class SearchService {
 
   SearchService(String clientId, String clientSecret)
       : _spotifyApi = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret));
-  Future<List<model.Track>?> albumsTracks(String albumId) async {
-    List<model.Track> ll = [];
+  Future<List<Track>?> albumsTracks(String albumId) async {
+    List<Track> ll = [];
     try {
       var tracks = await _spotifyApi.albums.tracks(albumId).all();
       tracks.forEach(
         (element) {
-          ll.add(model.Track.fromJson(element.toJson()));
+          ll.add(Track.fromJson(element.toJson()));
         },
       );
 
@@ -48,6 +48,7 @@ class SearchService {
     var tracks = await _spotifyApi.artists.topTracks(idArtist, Market.MZ);
     tracks.forEach(
       (element) {
+        print(element.artists!.first.name);
         ll.add(Track.fromJson(element.toJson()));
       },
     );
@@ -55,11 +56,11 @@ class SearchService {
     return ll;
   }
 
-  Future<List<model.Track>?> playListTrack(String playListId) async {
+  Future<List<Track>?> playListTrack(String playListId) async {
     try {
       var tracks =
           await _spotifyApi.playlists.getTracksByPlaylistId(playListId).all();
-      return tracks.map((e) => model.Track.fromJson(e.toJson())).toList();
+      return tracks.map((e) => Track.fromJson(e.toJson())).toList();
     } catch (e) {
       print('Error fetching playlist tracks: $e');
       return null;

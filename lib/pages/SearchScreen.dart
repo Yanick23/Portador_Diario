@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
+
 import 'package:spoti_stream_music/providers/artistsProvider.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
@@ -266,7 +266,7 @@ class _SearchScreenState extends State<SearchScreen> {
             } else if (result is spoti.PlaylistSimple) {
               _handlePlayListTap(context, result);
             } else if (result is spoti.Artist) {
-              _handleArtistTap(context, Artists.fromJson(result.toJson()));
+              _handleArtistTap(context, spoti.Artist.fromJson(result.toJson()));
             }
           },
         );
@@ -317,7 +317,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _handleTrackTap(BuildContext context, spoti.Track track) {
-    final List<Track>? tracks = [Track.fromJson(track.toJson())];
+    final List<spoti.Track>? tracks = [spoti.Track.fromJson(track.toJson())];
 
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
@@ -327,14 +327,14 @@ class _SearchScreenState extends State<SearchScreen> {
         .updatePlayMusicBarState(track);
   }
 
-  void _handleArtistTap(BuildContext context, Artists artist) {
+  void _handleArtistTap(BuildContext context, spoti.Artist artist) {
     Provider.of<ArtistProvider>(context, listen: false).setAtistt(artist);
     Provider.of<PageState>(context, listen: false).updateSelectedPage(7);
   }
 
   void _handleAlbumTap(
       BuildContext context, spoti.AlbumSimple albumSimple) async {
-    final List<Track>? tracks =
+    final List<spoti.Track>? tracks =
         await _searchService.albumsTracks(albumSimple.id!);
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
@@ -346,7 +346,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _handlePlayListTap(
       BuildContext context, spoti.PlaylistSimple playlist) async {
-    final List<Track>? tracks =
+    final List<spoti.Track>? tracks =
         await _searchService.playListTrack(playlist.id!);
     final bf = tracks?.map((e) => print(e.name)).toList() ?? [];
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);

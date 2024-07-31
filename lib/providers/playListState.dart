@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spotify/spotify.dart';
 
 class PlaylistState with ChangeNotifier {
   List<Track> _trackList = [];

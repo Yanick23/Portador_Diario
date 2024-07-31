@@ -131,7 +131,7 @@ class Album {
   ExternalUrls? externalUrls;
   String? href;
   String? id;
-  List<Images>? images;
+  List<Image>? images;
   String? name;
   String? releaseDate;
   String? releaseDatePrecision;
@@ -169,9 +169,9 @@ class Album {
     href = json['href'];
     id = json['id'];
     if (json['images'] != null) {
-      images = <Images>[];
+      images = <Image>[];
       json['images'].forEach((v) {
-        images!.add(new Images.fromJson(v));
+        images!.add(new Image.fromJson(v));
       });
     }
     name = json['name'];
@@ -212,7 +212,7 @@ class Album {
     availableMarkets = album.availableMarkets;
     href = album.href;
     id = album.id;
-    images = album.images?.map((e) => Images.fromData(e)).toList();
+    images = album.images?.map((e) => Image.fromData(e)).toList();
     name = album.name;
     releaseDate = album.releaseDate;
     releaseDatePrecision = album.releaseDatePrecision;
@@ -229,7 +229,7 @@ class Artists {
   String? name;
   String? type;
   String? uri;
-  List<Images>? images;
+  List<Image>? images;
 
   Artists({
     this.externalUrls,
@@ -251,9 +251,9 @@ class Artists {
     type = json['type'];
     uri = json['uri'];
     if (json['images'] != null) {
-      images = <Images>[];
+      images = <Image>[];
       json['images'].forEach((v) {
-        images!.add(new Images.fromJson(v));
+        images!.add(new Image.fromJson(v));
       });
     }
   }
@@ -280,7 +280,7 @@ class Artists {
     name = artist.name;
     type = artist.type;
     uri = artist.uri;
-    images = artist.images?.map((e) => Images.fromData(e)).toList();
+    images = artist.images?.map((e) => Image.fromData(e)).toList();
   }
 }
 
@@ -300,19 +300,19 @@ class ExternalUrls {
   }
 }
 
-class Images {
+class Image {
   int? height;
   String? url;
   int? width;
 
-  Images({this.height, this.url, this.width});
+  Image({this.height, this.url, this.width});
 
-  Images.fromJson(Map<String, dynamic> json) {
+  Image.fromJson(Map<String, dynamic> json) {
     height = json['height'];
     url = json['url'];
     width = json['width'];
   }
-  Images.fromData(Images image) {
+  Image.fromData(Image image) {
     height = image.height;
     url = image.url;
     width = image.width;
@@ -410,7 +410,7 @@ class Playlist {
   Followers? followers;
   String? href;
   String? id;
-  List<Images>? images;
+  List<Image>? images;
   String? name;
   Owner? owner;
   bool? public;
@@ -449,9 +449,9 @@ class Playlist {
     href = json['href'];
     id = json['id'];
     if (json['images'] != null) {
-      images = <Images>[];
+      images = <Image>[];
       json['images'].forEach((v) {
-        images!.add(new Images.fromJson(v));
+        images!.add(new Image.fromJson(v));
       });
     }
     name = json['name'];

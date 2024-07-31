@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/models/modelsData.dart' as models;
 import 'package:spoti_stream_music/providers/artistsProvider.dart';
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
@@ -25,8 +23,8 @@ class _ArtistPageState extends State<ArtistPage> {
   bool showTopBar = false;
   List<spoti.Album> discografia = [];
   List<spoti.Track> top10Tracks = [];
-  models.Artists? artist;
-  List<models.Track> _trackList = [];
+  spoti.Artist? artist;
+  List<spoti.Track> _trackList = [];
 
   final SearchService _searchService = SearchService(
       'cac81364fb3c4160815b48280446612e', 'd12dd157d54342759fe55340b8354e80');
@@ -186,14 +184,16 @@ class _ArtistPageState extends State<ArtistPage> {
                                 onTap: () {
                                   Provider.of<PlaylistState>(context,
                                           listen: false)
-                                      .updateTrackList(
-                                          top10Tracks.cast<models.Track>());
+                                      .updateTrackList(top10Tracks);
                                   Provider.of<CurrentIndexMusicState>(context,
                                           listen: false)
                                       .updateCurrentIndexMusic(index);
                                   Provider.of<PlayMusicBarState>(context,
                                           listen: false)
                                       .updatePlayMusicBarState(true);
+                                  Provider.of<TypereproducerState>(context,
+                                          listen: false)
+                                      .updatePlayMusicBarState(spoti.Track);
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -266,47 +266,68 @@ class _ArtistPageState extends State<ArtistPage> {
                             itemCount: discografia.length,
                             itemBuilder: (context, index) {
                               var item = discografia[index];
-                              return Container(
-                                width: 150,
-                                margin: EdgeInsets.symmetric(horizontal: 5),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      height: 150,
-                                      decoration: BoxDecoration(
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.white,
+                              return GestureDetector(
+                                onTap: () async {
+                                  final List<spoti.Track>? tracks =
+                                      await _searchService
+                                          .albumsTracks(item.id!);
+                                  Provider.of<PageState>(context, listen: false)
+                                      .updateSelectedPage(6);
+                                  Provider.of<ImagePlayListAndAlbumstate>(
+                                          context,
+                                          listen: false)
+                                      .updateImageUrl(item.images!.first!.url!);
+                                  Provider.of<PlaylistState>(context,
+                                          listen: false)
+                                      .updateTrackList(tracks);
+                                  Provider.of<TypereproducerState>(context,
+                                          listen: false)
+                                      .updatePlayMusicBarState(item);
+                                },
+                                child: Container(
+                                  width: 150,
+                                  margin: EdgeInsets.symmetric(horizontal: 5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: 150,
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.white,
+                                            ),
+                                            BoxShadow(
+                                              color: Colors.white,
+                                            )
+                                          ],
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                item.images!.first!.url!),
+                                            fit: BoxFit.cover,
                                           ),
-                                          BoxShadow(
-                                            color: Colors.white,
-                                          )
-                                        ],
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                              item.images!.first!.url!),
-                                          fit: BoxFit.cover,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
-                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      item.name!,
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 3),
-                                    Text(
-                                      item.releaseDate!,
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                    ),
-                                  ],
+                                      SizedBox(height: 5),
+                                      Text(
+                                        item.name!,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(height: 3),
+                                      Text(
+                                        item.releaseDate!,
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -361,7 +382,7 @@ class _ArtistPageState extends State<ArtistPage> {
   }
 
   void _handleTrackTap(BuildContext context, spoti.Track track) {
-    final List<models.Track>? tracks = [models.Track.fromJson(track.toJson())];
+    final List<spoti.Track>? tracks = [track];
 
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
@@ -371,28 +392,27 @@ class _ArtistPageState extends State<ArtistPage> {
         .updatePlayMusicBarState(track);
   }
 
-  void _handleArtistTap(BuildContext context, models.Artists artist) {
+  void _handleArtistTap(BuildContext context, spoti.Artist artist) {
     Provider.of<ArtistProvider>(context, listen: false).setAtistt(artist);
     Provider.of<PageState>(context, listen: false).updateSelectedPage(7);
   }
 
-  void _handleAlbumTap(
-      BuildContext context, spoti.AlbumSimple albumSimple) async {
-    final List<models.Track>? tracks =
-        await _searchService.albumsTracks(albumSimple.id!);
+  void _handleAlbumTap(BuildContext context, spoti.AlbumSimple item) async {
+    final List<spoti.Track>? tracks =
+        await _searchService.albumsTracks(item.id!);
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
-        .updateImageUrl(albumSimple.images!.first!.url!);
+        .updateImageUrl(item.images!.first!.url!);
     Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
-        .updatePlayMusicBarState(albumSimple);
+        .updatePlayMusicBarState(item);
   }
 
   void _handlePlayListTap(
       BuildContext context, spoti.PlaylistSimple playlist) async {
-    final List<models.Track>? tracks =
+    final List<spoti.Track>? tracks =
         await _searchService.playListTrack(playlist.id!);
-    final bf = tracks?.map((e) => print(e.name)).toList() ?? [];
+
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(playlist.images!.first!.url!);

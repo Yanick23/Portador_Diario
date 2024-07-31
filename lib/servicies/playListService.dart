@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:spoti_stream_music/models/modelsData.dart';
 import 'package:spoti_stream_music/widgets/dados.dart';
+import 'package:spotify/spotify.dart';
 
 class PlaylistService {
   Playlist getPlayList() {

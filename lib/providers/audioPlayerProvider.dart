@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:spoti_stream_music/models/modelsData.dart';
+import 'package:spotify/spotify.dart';
 
 class AudioPLayerProvider with ChangeNotifier {
   final AudioPlayer _audioPLayer = AudioPlayer();
@@ -27,6 +27,7 @@ class AudioPLayerProvider with ChangeNotifier {
       await (_audioPLayer.audioSource as ConcatenatingAudioSource)
           .add(audioSource);
     }
+    notifyListeners();
   }
 
   Future<void> play() async {
