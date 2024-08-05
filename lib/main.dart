@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:provider/provider.dart';
 import 'package:spoti_stream_music/pages/mainScreen.dart';
 import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/providers/artistsProvider.dart';
-import 'package:spoti_stream_music/providers/audioPlayerProvider.dart';
+
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/providers/playListState.dart';
+import 'package:spoti_stream_music/providers/AudioPLayerProvider.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 
-void main() {
+void main()  async{
+  
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ArtistProvider()),
@@ -19,7 +21,7 @@ void main() {
         create: (context) => PageState(),
       ),
       ChangeNotifierProvider(
-        create: (context) => PlaylistState(),
+        create: (context) => AudioPLayerProvider(),
       ),
       ChangeNotifierProvider(
         create: (context) => CurrentIndexMusicState(),

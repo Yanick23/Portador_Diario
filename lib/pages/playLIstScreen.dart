@@ -1,12 +1,14 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/providers/playListState.dart';
+
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/servicies/playListService.dart';
-import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
+
 import 'package:spotify/spotify.dart';
 
 class Playlistscreen extends StatefulWidget {
@@ -46,7 +48,7 @@ class _PlaylistscreenState extends State<Playlistscreen> {
               Provider.of<PageState>(context, listen: false)
                   .updateSelectedPage(4);
             },
-            icon: Icon(Icons.arrow_back)),
+            icon: const Icon(Icons.arrow_back)),
         title: const Text(
           "Playlists",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -66,7 +68,7 @@ class _PlaylistscreenState extends State<Playlistscreen> {
                 Provider.of<PageState>(context, listen: false)
                     .updateSelectedPage(6);
                 Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
-                    .updateImageUrl(_playlists[index]!.images!.first!.url!);
+                    .updateImageUrl(_playlists[index].images!.first.url!);
               },
             );
           },

@@ -1,20 +1,19 @@
-import 'dart:async';
-
+import 'package:audio_service/audio_service.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_infinite_marquee/flutter_infinite_marquee.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:provider/provider.dart';
 
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
+import 'package:spoti_stream_music/servicies/downloadService.dart';
 
 import 'package:spotify/spotify.dart' as listMusix;
-import 'package:spoti_stream_music/providers/audioPlayerProvider.dart';
+
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
-import 'package:spoti_stream_music/providers/playListState.dart';
+import 'package:spoti_stream_music/providers/AudioPLayerProvider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class MusicPlayer extends StatefulWidget {
@@ -38,7 +37,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   late Object trackInfo = Object();
 
   Widget _buildPlayingBar(listMusix.Track? currentTrack, TextTheme textTheme) {
-    return Container(
+    return SizedBox(
       height: 70,
       child: ListTile(
         leading: GestureDetector(
@@ -53,40 +52,31 @@ class _MusicPlayerState extends State<MusicPlayer> {
             });
           },
           child: Icon(
+            shadows: const [
+              BoxShadow(
+                  color: Colors.black, blurRadius: 10, offset: Offset(0, 1)),
+              BoxShadow(
+                  color: Colors.black, blurRadius: 5, offset: Offset(0, 1))
+            ],
             isPlaying ? Icons.pause_sharp : Icons.play_arrow,
             color: Colors.white,
             size: 30,
           ),
         ),
         title: Text(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           currentTrack?.name ?? '',
-          style: TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 12),
         ),
-        subtitle:
-            currentTrack?.artists != null && currentTrack!.artists!.isNotEmpty
-                ? Container(
-                    height: 20,
-                    child: currentTrack.artists!.length > 1
-                        ? InfiniteMarquee(
-                            frequency: Duration(milliseconds: 30),
-                            initialScrollOffset: 0,
-                            scrollDirection: Axis.horizontal,
-                            separatorBuilder: (context, index) {
-                              return Text(', ');
-                            },
-                            itemBuilder: (context, index) {
-                              return Text(
-                                  '${currentTrack.artists![index % currentTrack.artists!.length].name}');
-                            },
-                          )
-                        : currentTrack.artists!.length == 1
-                            ? Text('${currentTrack.artists![0].name}')
-                            : null)
-                : Text(
-                    '${currentTrack!.artists![0].name}',
-                    style: TextStyle(fontSize: 12, color: Colors.white),
-                  ),
-        trailing: Icon(Icons.favorite),
+        subtitle: Text(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            '${currentTrack?.artists!.first.name}'),
+        trailing: const Icon(shadows: [
+          BoxShadow(color: Colors.black, blurRadius: 10, offset: Offset(0, 1)),
+          BoxShadow(color: Colors.black, blurRadius: 5, offset: Offset(0, 1))
+        ], Icons.favorite),
       ),
     );
   }
@@ -97,19 +87,19 @@ class _MusicPlayerState extends State<MusicPlayer> {
     track = Provider.of<CurrentIndexMusicState>(context, listen: false)
         .currentIndexMusic;
     late List<listMusix.Track> tracks =
-        Provider.of<PlaylistState>(context, listen: false).getTrackList!;
+        Provider.of<AudioPLayerProvider>(context, listen: false).getTrackList;
     imageUrl = Provider.of<ImagePlayListAndAlbumstate>(context).imageUrl;
     trackInfo = Provider.of<TypereproducerState>(context).ObjecTypereproducer;
 
     setState(() {
       a = [];
-      tracks!.forEach((element) {
-        a.add(element!);
-      });
+      for (var element in tracks) {
+        a.add(element);
+      }
     });
 
     if (track != null) {
-      _initializeTrack();
+      _setupTrack(track!);
     }
   }
 
@@ -117,62 +107,60 @@ class _MusicPlayerState extends State<MusicPlayer> {
   void initState() {
     super.initState();
     player = AudioPlayer();
+    player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _nextTrack();
+      }
+    });
 
     if (track != null) {
-      _initializeTrack();
+      _setupTrack(track!);
     }
   }
 
-  Future<void> PlayMusic(String text) async {
+  Future<void> _playMusic(String text) async {
     final yt = YoutubeExplode();
     final video = (await yt.search.search(text)).first;
     final videoId = video.id.value;
-
     var manifest = await yt.videos.streamsClient.getManifest(videoId);
     var audioUrl = manifest.audioOnly.last.url;
 
-    await player.setUrl(audioUrl.toString());
+    player.setAudioSource(AudioSource.uri(Uri.parse(audioUrl.toString()),
+        tag: MediaItem(
+            id: '${a[track!].id}',
+            title: '${a[track!].name}',
+            artUri: Uri.parse('${a[track!].album!.images!.first.url}'),
+            album: '${a[track!].album!.name}')));
+
     await player.play();
     setState(() {
-      isPlaying = player.playerState.playing;
-      ;
-      duration = video.duration!;
+      isPlaying = true;
     });
   }
 
   late Color? color = Colors.black;
 
-  void _initializeTrack() async {
+  Future<void> _setupTrack(int index) async {
     setState(() {
       isLoading = true;
     });
-    try {
-      var currentTrack = a[track!];
-      await PlayMusic(
-          '${currentTrack.artists!.first.name} - ${currentTrack.name} (audio)');
-      String? tempSongName = currentTrack.name;
-      if (tempSongName != null) {
-        currentTrack.name = tempSongName;
 
-        String? image = currentTrack.album?.images?.first.url;
-        if (image != null) {
-          final tempSongColor = await getImagePalette(NetworkImage(image));
-          if (tempSongColor != null) {
-            setState(() {
-              color = tempSongColor;
-              isLoading = false;
-            });
-          }
-        } else if (trackInfo is listMusix.AlbumSimple) {
-          final tempSongColor = await getImagePalette(NetworkImage(imageUrl));
-          if (tempSongColor != null) {
-            setState(() {
-              color = tempSongColor;
-              isLoading = false;
-            });
-          }
-        }
-      }
+    try {
+      var currentTrack = a[index];
+      Provider.of<CurrentIndexMusicState>(context, listen: false)
+          .updateCurrentIndexMusic(index);
+      Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
+          .updateImageUrl(imageUrl);
+      await _playMusic(
+          '${currentTrack.artists!.first.name} - ${currentTrack.name} (audio)');
+
+      String? image = currentTrack.album?.images?.first.url ?? imageUrl;
+      final tempSongColor = await getImagePalette(NetworkImage(image));
+
+      setState(() {
+        color = tempSongColor;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -180,39 +168,17 @@ class _MusicPlayerState extends State<MusicPlayer> {
     }
   }
 
-  void _changeMusic(int index) async {
-    setState(() {
-      isLoading = true;
-      isPlaying = false;
-    });
-
-    var nextTrack = a[index];
-    await PlayMusic('${nextTrack.artists!.first!.name} - ${nextTrack.name}');
-    String? tempSongName = nextTrack.name;
-    if (tempSongName != null) {
-      nextTrack.name = tempSongName;
-
-      String? image = nextTrack.album?.images?.first.url;
-      if (image != null) {
-        final tempSongColor = await getImagePalette(NetworkImage(image));
-        if (tempSongColor != null) {
-          setState(() {
-            color = tempSongColor;
-            isLoading = false;
-            track = index;
-          });
-        }
-      }
-    }
-  }
-
   void _nextTrack() {
-    _changeMusic(track! + 1);
+    if (track! + 1 < a.length) {
+      _setupTrack(track! + 1);
+    } else {
+      player.stop();
+    }
   }
 
   void _previousTrack() {
     if (track! - 1 >= 0) {
-      _changeMusic(track! - 1);
+      _setupTrack(track! - 1);
     }
   }
 
@@ -228,166 +194,216 @@ class _MusicPlayerState extends State<MusicPlayer> {
     track = Provider.of<CurrentIndexMusicState>(context).currentIndexMusic;
 
     var currentTrack = a[track!];
-    print('quantidade - ${a.length}');
 
-    print(currentTrack.name);
-    return Scaffold(
-      backgroundColor: color!,
-      body: widget.showBarPlay
-          ? _buildPlayingBar(currentTrack, textTheme)
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 26),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.close,
-                          color: Colors.transparent,
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
+    return StreamBuilder<Duration>(
+        stream: player.positionStream,
+        builder: (context, snapshot) {
+          final position = snapshot.data ?? Duration.zero;
+          return Scaffold(
+            backgroundColor: color!,
+            body: SafeArea(
+              child: widget.showBarPlay
+                  ? _buildPlayingBar(currentTrack, textTheme)
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 26),
+                      child: Expanded(
+                        child: Column(
                           children: [
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 30),
                             Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(width: 4),
-                                Text(
-                                  currentTrack.artists?.first.name ?? "",
-                                  style: textTheme.bodyLarge
-                                      ?.copyWith(color: Colors.white),
-                                )
-                              ],
-                            )
-                          ],
-                        ),
-                        const Icon(Icons.close, color: Colors.white),
-                      ],
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: isLoading
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                color: Colors.blue,
-                              ))
-                            : trackInfo is listMusix.AlbumSimple
-                                ? ArtWorkImage(
-                                    image: imageUrl,
-                                  )
-                                : ArtWorkImage(
-                                    image:
-                                        currentTrack.album!.images!.first!.url,
-                                  ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    currentTrack.name ?? '',
-                                    style: textTheme.titleLarge
-                                        ?.copyWith(color: Colors.white),
-                                  ),
-                                  Text(
-                                    currentTrack.artists!.first.name ?? '-',
-                                    style: textTheme.titleMedium
-                                        ?.copyWith(color: Colors.white60),
-                                  ),
-                                ],
-                              ),
-                              const Icon(
-                                Icons.favorite,
-                                color: CustomColors.primaryColor,
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          StreamBuilder<Duration>(
-                              stream: player.positionStream,
-                              builder: (context, snapshot) {
-                                final position = snapshot.data ?? Duration.zero;
-                                return Column(
+                                const Icon(
+                                  Icons.close,
+                                  color: Colors.transparent,
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    ProgressBar(
-                                      progress: position,
-                                      total: player.duration ??
-                                          const Duration(minutes: 4),
-                                      bufferedBarColor: Colors.white38,
-                                      buffered: player.bufferedPosition ??
-                                          Duration.zero,
-                                      baseBarColor: Colors.white10,
-                                      thumbColor: Colors.white,
-                                      timeLabelTextStyle:
-                                          const TextStyle(color: Colors.white),
-                                      progressBarColor: Colors.white,
-                                      onSeek: (duration) {
-                                        player.seek(duration);
-                                      },
-                                    ),
+                                    const SizedBox(height: 6),
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            _previousTrack();
-                                          },
-                                          icon: const Icon(Icons.skip_previous,
-                                              color: Colors.white, size: 36),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            if (isPlaying) {
-                                              await player.pause();
-                                            } else {
-                                              await player.play();
-                                            }
-                                            setState(() {
-                                              isPlaying = !isPlaying;
-                                            });
-                                          },
-                                          icon: Icon(
-                                            isPlaying
-                                                ? Icons.pause_sharp
-                                                : Icons.play_arrow,
-                                            color: Colors.white,
-                                            size: 60,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () {
-                                            _nextTrack();
-                                          },
-                                          icon: const Icon(Icons.skip_next,
-                                              color: Colors.white, size: 36),
-                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          currentTrack.artists?.first.name ??
+                                              "",
+                                          maxLines: 1,
+                                          style: textTheme.bodyLarge
+                                              ?.copyWith(color: Colors.white),
+                                        )
                                       ],
                                     )
                                   ],
-                                );
-                              }),
-                          const SizedBox(height: 16),
-                        ],
+                                ),
+                                const Icon(Icons.close, color: Colors.white),
+                              ],
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Center(
+                                child: isLoading
+                                    ? const Center(
+                                        child: CircularProgressIndicator(
+                                        color: Colors.blue,
+                                      ))
+                                    : trackInfo is listMusix.AlbumSimple
+                                        ? ArtWorkImage(
+                                            image: imageUrl,
+                                          )
+                                        : ArtWorkImage(
+                                            image: currentTrack
+                                                .album!.images!.first.url,
+                                          ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 310,
+                                      child: Text(
+                                        currentTrack.name ?? '',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: textTheme.titleLarge
+                                            ?.copyWith(color: Colors.white),
+                                      ),
+                                    ),
+                                    Text(
+                                      currentTrack.artists!.first.name ?? '-',
+                                      maxLines: 1,
+                                      style: textTheme.titleMedium
+                                          ?.copyWith(color: Colors.white60),
+                                    ),
+                                  ],
+                                ),
+                                const Icon(
+                                  shadows: [
+                                    BoxShadow(
+                                        color: Colors.black,
+                                        blurRadius: 10,
+                                        offset: Offset(0, 1)),
+                                    BoxShadow(
+                                        color: Colors.black,
+                                        blurRadius: 10,
+                                        offset: Offset(0, 1))
+                                  ],
+                                  Icons.favorite,
+                                  color: CustomColors.primaryColor,
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            ProgressBar(
+                              barCapShape: BarCapShape.square,
+                              progress: position,
+                              total:
+                                  player.duration ?? const Duration(minutes: 4),
+                              bufferedBarColor: Colors.white38,
+                              buffered: player.bufferedPosition,
+                              baseBarColor: Colors.white10,
+                              thumbColor: Colors.white,
+                              timeLabelTextStyle: const TextStyle(
+                                color: Colors.white,
+                                shadows: [
+                                  BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 1)),
+                                  BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 1))
+                                ],
+                              ),
+                              progressBarColor: Colors.white,
+                              onSeek: (duration) {
+                                player.seek(duration);
+                              },
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                IconButton(
+                                  onPressed: _previousTrack,
+                                  icon: const Icon(
+                                      shadows: [
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            blurRadius: 10,
+                                            offset: Offset(0, 3)),
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            blurRadius: 20,
+                                            offset: Offset(0, 3))
+                                      ],
+                                      Icons.skip_previous,
+                                      color: Colors.white,
+                                      size: 36),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    if (isPlaying) {
+                                      await player.pause();
+                                    } else {
+                                      await player.play();
+                                    }
+                                    setState(() {
+                                      isPlaying = !isPlaying;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    shadows: const [
+                                      BoxShadow(
+                                          color: Colors.black,
+                                          blurRadius: 10,
+                                          offset: Offset(0, 3)),
+                                      BoxShadow(
+                                          color: Colors.black,
+                                          blurRadius: 20,
+                                          offset: Offset(0, 3))
+                                    ],
+                                    isPlaying
+                                        ? Icons.pause_sharp
+                                        : Icons.play_arrow,
+                                    color: Colors.white,
+                                    size: 60,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: _nextTrack,
+                                  icon: const Icon(
+                                      shadows: [
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            blurRadius: 10,
+                                            offset: Offset(0, 3)),
+                                        BoxShadow(
+                                            color: Colors.black,
+                                            blurRadius: 20,
+                                            offset: Offset(0, 3))
+                                      ],
+                                      Icons.skip_next,
+                                      color: Colors.white,
+                                      size: 36),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 50,
+                            )
+                          ],
+                        ),
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    ),
             ),
-    );
+          );
+        });
   }
 }
 
@@ -416,11 +432,9 @@ class ArtWorkImage extends StatelessWidget {
                   ));
             },
           )
-        : Container(
-            child: Icon(
-              Icons.music_note,
-              size: 100,
-            ),
+        : const Icon(
+            Icons.music_note,
+            size: 100,
           );
   }
 }

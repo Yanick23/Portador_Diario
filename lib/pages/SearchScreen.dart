@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import 'package:spoti_stream_music/providers/artistsProvider.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
-import 'package:spoti_stream_music/providers/playListState.dart';
+import 'package:spoti_stream_music/providers/AudioPLayerProvider.dart';
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/servicies/searchService.dart';
 import 'package:spotify/spotify.dart' as spoti;
+import 'package:shimmer/shimmer.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -185,16 +187,66 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
             Expanded(
               child: _isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Shimmer.fromColors(
+                        baseColor: Color.fromARGB(255, 126, 123, 123),
+                        highlightColor: Color.fromARGB(255, 236, 231, 231),
+                        child: ListView.builder(
+                          itemCount: 10,
+                          itemBuilder: (context, index) {
+                            return dummyListViewCell();
+                          },
+                        ),
+                      ),
+                    )
                   : _buildSearchResults(),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget dummyListViewCell() {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              color: Colors.white,
+            ),
+            Padding(padding: EdgeInsets.symmetric(horizontal: 8.0)),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 8,
+                  color: Colors.white,
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+                Container(
+                  width: double.infinity,
+                  height: 8,
+                  color: Colors.white,
+                ),
+                Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+                Container(
+                  width: 40,
+                  height: 8,
+                  color: Colors.white,
+                ),
+              ],
+            ))
+          ],
+        ));
   }
 
   Widget _buildFilterChip(
@@ -251,6 +303,8 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           title: Text(
             _getResultName(result)!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Colors.white),
           ),
           subtitle: Text(
@@ -322,7 +376,8 @@ class _SearchScreenState extends State<SearchScreen> {
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(track!.album!.images!.first!.url!);
-    Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
+    Provider.of<AudioPLayerProvider>(context, listen: false)
+        .updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
         .updatePlayMusicBarState(track);
   }
@@ -339,7 +394,8 @@ class _SearchScreenState extends State<SearchScreen> {
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(albumSimple.images!.first!.url!);
-    Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
+    Provider.of<AudioPLayerProvider>(context, listen: false)
+        .updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
         .updatePlayMusicBarState(albumSimple);
   }
@@ -352,7 +408,8 @@ class _SearchScreenState extends State<SearchScreen> {
     Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(playlist.images!.first!.url!);
-    Provider.of<PlaylistState>(context, listen: false).updateTrackList(tracks);
+    Provider.of<AudioPLayerProvider>(context, listen: false)
+        .updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
         .updatePlayMusicBarState(playlist);
   }

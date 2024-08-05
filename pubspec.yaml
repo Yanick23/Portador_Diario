@@ -50,6 +50,8 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_infinite_marquee: ^1.0.0
   rxdart: ^0.28.0
+  shimmer: ^3.0.0
+  flutter_downloader: ^1.8.0
  
   
 

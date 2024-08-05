@@ -1,13 +1,11 @@
-import 'dart:convert';
+// ignore: duplicate_ignore
+// ignore: file_names
+// ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:spoti_stream_music/pages/homeScreen.dart';
-import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/widgets/optionFavoritePage.dart';
-import 'package:spotify/spotify.dart';
 
 class PageViewFavoriteMusic extends StatefulWidget {
   final int? onNavigateToPlaylist;
@@ -20,8 +18,6 @@ class PageViewFavoriteMusic extends StatefulWidget {
 class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
   @override
   Widget build(BuildContext context) {
-    int selectedPage = Provider.of<PageState>(context).selectedPage;
-
     return Container(
       padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
       child: Column(
@@ -59,7 +55,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
             ),
             colorText: Color.fromARGB(255, 255, 255, 255),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           const OptionFavoritePage(
@@ -71,7 +67,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
                 )),
             colorText: Color.fromARGB(255, 255, 255, 255),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           GestureDetector(
@@ -89,7 +85,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
               colorText: Color.fromARGB(255, 255, 255, 255),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           const OptionFavoritePage(
@@ -101,7 +97,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
                 )),
             colorText: Color.fromARGB(255, 255, 255, 255),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           const OptionFavoritePage(

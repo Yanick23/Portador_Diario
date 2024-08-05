@@ -9,7 +9,6 @@ import 'package:spoti_stream_music/pages/playLIstScreen.dart';
 import 'package:spoti_stream_music/pages/playListMusic.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
-import 'package:spoti_stream_music/servicies/searchService.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key});
@@ -152,35 +151,33 @@ class _MainScreenState extends State<MainScreen> {
     required int targetPage,
     Color? color,
   }) {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            width: 50,
-            height: 30,
-            child: IconButton(
-              highlightColor: Colors.transparent,
-              icon: Icon(
-                icon,
-                size: 25,
-                color: color,
-              ),
-              onPressed: () => {
-                Provider.of<PageState>(context, listen: false)
-                    .updateSelectedPage(targetPage),
-              },
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
           ),
-          Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          width: 50,
+          height: 30,
+          child: IconButton(
+            highlightColor: Colors.transparent,
+            icon: Icon(
+              icon,
+              size: 25,
+              color: color,
+            ),
+            onPressed: () => {
+              Provider.of<PageState>(context, listen: false)
+                  .updateSelectedPage(targetPage),
+            },
           ),
-        ],
-      ),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontWeight: FontWeight.bold, color: color),
+        ),
+      ],
     );
   }
 }
