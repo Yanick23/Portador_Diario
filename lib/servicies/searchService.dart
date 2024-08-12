@@ -23,6 +23,24 @@ class SearchService {
     }
   }
 
+  Future<List<Artist>?> getArtistRelated(String IdArtist) async {
+    List<Artist> ll = [];
+    try {
+      var tracks = await _spotifyApi.artists.relatedArtists(IdArtist);
+      tracks.forEach(
+        (element) {
+          print(element.name);
+          ll.add(Artist.fromJson(element.toJson()));
+        },
+      );
+
+      return ll;
+    } catch (e) {
+      print('Error fetching album tracks: $e');
+      return null;
+    }
+  }
+
   Future<List<Album>?> Discografia(String idArtist, List<String> lista) async {
     List<Album> ll = [];
 
@@ -36,7 +54,6 @@ class SearchService {
       (value) {
         value.forEach(
           (element) {
-            print(element.name);
             ll.add(element);
           },
         );
@@ -57,13 +74,35 @@ class SearchService {
     return ll;
   }
 
+  Future<List<PlaylistSimple>> PlayListArtist(String query) async {
+    List<PlaylistSimple> searchResults = [];
+
+    try {
+      var results = await _spotifyApi.search
+          .get(query, types: [SearchType.playlist]).first();
+
+      for (var page in results) {
+        if (page.items != null) {
+          for (var item in page.items!) {
+            if (item is PlaylistSimple) {
+              searchResults.add(item);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Erro ao buscar playlists: $e');
+    }
+
+    return searchResults;
+  }
+
   Future<List<Track>?> top10TrackArtist(String idArtist) async {
     List<Track> ll = [];
 
     var tracks = await _spotifyApi.artists.topTracks(idArtist, Market.MZ);
     tracks.forEach(
       (element) {
-        print(element.artists!.first.name);
         ll.add(Track.fromJson(element.toJson()));
       },
     );

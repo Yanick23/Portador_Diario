@@ -11,6 +11,7 @@ import 'package:spoti_stream_music/providers/AudioPLayerProvider.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/servicies/searchService.dart';
+import 'package:spoti_stream_music/widgets/CircularArtistCard.dart';
 import 'package:spoti_stream_music/widgets/dommyCard.dart';
 import 'package:spoti_stream_music/widgets/dummyListViewCell.dart';
 import 'package:spotify/spotify.dart' as spoti;
@@ -28,6 +29,8 @@ class _ArtistPageState extends State<ArtistPage> {
   bool showTopBar = false;
   List<spoti.Album> discografia = [];
   List<spoti.Track> top10Tracks = [];
+  List<spoti.Artist> artists = [];
+  List<spoti.PlaylistSimple> playlists = [];
   spoti.Artist? artist;
   bool _loadingTop10 = true;
   bool _loadingTopDisc = true;
@@ -44,26 +47,26 @@ class _ArtistPageState extends State<ArtistPage> {
 
   void _fetchTopTracks() async {
     if (artist != null) {
-      List<spoti.Track>? tracks =
-          await _searchService.top10TrackArtist(artist!.id!);
-
-      setState(() {
-        _loadingTop10 = false;
-      });
-
-      List<spoti.Album>? albums =
-          await _searchService.Discografia(artist!.id!, ['album', 'single']);
-
-      setState(() {
-        _loadingTopDisc = false;
-      });
-
-      setState(() {
-        if (tracks != null) {
-          top10Tracks = tracks;
-          discografia = albums!;
-        }
-      });
+      try {
+        final playlists = await _searchService.PlayListArtist(artist!.name!);
+        final tracks = await _searchService.top10TrackArtist(artist!.id!);
+        final albums =
+            await _searchService.Discografia(artist!.id!, ['album', 'single']);
+        final artistas = await _searchService.getArtistRelated(artist!.id!);
+        setState(() {
+          this.playlists = playlists ?? [];
+          this.top10Tracks = tracks ?? [];
+          this.discografia = albums ?? [];
+          this.artists = artistas ?? [];
+          _loadingTop10 = false;
+          _loadingTopDisc = false;
+        });
+      } catch (e) {
+        setState(() {
+          _loadingTop10 = false;
+          _loadingTopDisc = false;
+        });
+      }
     }
   }
 
@@ -127,335 +130,519 @@ class _ArtistPageState extends State<ArtistPage> {
           SafeArea(
             child: SingleChildScrollView(
               controller: scrollController,
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(top: 15, bottom: 10),
-                    width: MediaQuery.of(context).size.width,
-                    height: 290,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0),
-                          const Color.fromARGB(255, 0, 0, 0).withOpacity(0),
-                          const Color.fromARGB(255, 45, 44, 44)
-                              .withOpacity(0.9),
-                        ],
+              child: Container(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(top: 15, bottom: 10),
+                      width: MediaQuery.of(context).size.width,
+                      height: 290,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0),
+                            const Color.fromARGB(255, 0, 0, 0).withOpacity(0),
+                            const Color.fromARGB(255, 45, 44, 44)
+                                .withOpacity(0.9),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 180),
-                        SizedBox(
-                          width: double.infinity,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 2,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 15),
-                                child: Text(
-                                  artist!.name!,
-                                  style: const TextStyle(
-                                    fontSize: 50,
-                                    fontWeight: FontWeight.bold,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 180),
+                          SizedBox(
+                            width: double.infinity,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 2,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 15),
+                                  child: Text(
+                                    artist!.name!,
+                                    style: const TextStyle(
+                                      fontSize: 50,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.visible,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.visible,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.only(left: 10, right: 10, top: 20),
-                    color: Colors.black,
-                    height: 800,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Top 10 mais ouvidos',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Container(
-                          height: 250,
-                          child: _loadingTop10
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Shimmer.fromColors(
-                                    baseColor: const Color.fromARGB(
-                                        255, 126, 123, 123),
-                                    highlightColor:
-                                        Color.fromARGB(255, 236, 231, 231),
-                                    child: ListView.builder(
-                                      itemCount: 4,
-                                      itemBuilder: (context, index) {
-                                        return const DummyListViewCell();
-                                      },
-                                    ),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  itemCount: top10Tracks.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Provider.of<AudioPLayerProvider>(
-                                                context,
-                                                listen: false)
-                                            .updateTrackList(top10Tracks);
-                                        Provider.of<CurrentIndexMusicState>(
-                                                context,
-                                                listen: false)
-                                            .updateCurrentIndexMusic(index);
-                                        Provider.of<PlayMusicBarState>(context,
-                                                listen: false)
-                                            .updatePlayMusicBarState(true);
-                                        Provider.of<TypereproducerState>(
-                                                context,
-                                                listen: false)
-                                            .updatePlayMusicBarState(
-                                                spoti.Track);
-                                      },
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                            border: Border(
-                                                bottom: BorderSide(
-                                                    width: 2,
-                                                    color: Colors.grey))),
-                                        child: ListTile(
-                                          leading: Image.network(
-                                              '${top10Tracks[index].album!.images!.first.url}'),
-                                          title: Text(
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            '${index + 1}. ${top10Tracks[index].name!}',
-                                            style: const TextStyle(
-                                                color: Colors.white),
-                                          ),
-                                          subtitle: Text(
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            '${top10Tracks[index].album!.name}',
-                                            style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                          ),
-                                        ),
+                    Container(
+                      padding:
+                          const EdgeInsets.only(left: 10, right: 10, top: 20),
+                      color: Colors.black,
+                      height: 1320,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Top 10 mais ouvidos',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Container(
+                            height: 250,
+                            child: _loadingTop10
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color.fromARGB(
+                                          255, 126, 123, 123),
+                                      highlightColor:
+                                          Color.fromARGB(255, 236, 231, 231),
+                                      child: ListView.builder(
+                                        itemCount: 4,
+                                        itemBuilder: (context, index) {
+                                          return const DummyListViewCell();
+                                        },
                                       ),
-                                    );
-                                  },
-                                ),
-                        ),
-                        SizedBox(
-                          height: 30,
-                          width: MediaQuery.sizeOf(context).width,
-                          child: ElevatedButton(
-                              onPressed: () {},
-                              child: const Center(
-                                child: Text(
-                                  'Mostrar tudo',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              )),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text(
-                            'Ultimo Lancamento',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 31, 30, 30),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                height: 150,
-                                width: 150,
-                                decoration: BoxDecoration(
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.white,
                                     ),
-                                    BoxShadow(
-                                      color: Colors.white,
-                                    )
-                                  ],
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                        '${discografia.first.images!.first.url}'),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        style: TextStyle(fontSize: 18),
-                                        '${discografia.first.albumType!.name.substring(0, 1).toUpperCase()}${discografia.first.albumType!.name.substring(
-                                          1,
-                                        )}'),
-                                    Text(
-                                        style: TextStyle(
-                                            fontSize: 18, color: Colors.grey),
-                                        'De ${discografia.first.artists!.first.name}'),
-                                    Text(
-                                        style: TextStyle(
-                                            fontSize: 15, color: Colors.grey),
-                                        'Lancado em ${discografia.first.releaseDate}')
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Text(
-                            'Discografia',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                          decoration: const BoxDecoration(boxShadow: [
-                            BoxShadow(
-                                color: Color.fromARGB(255, 149, 148, 148),
-                                blurRadius: 20,
-                                blurStyle: BlurStyle.outer,
-                                offset: Offset.infinite),
-                          ]),
-                          height: 200,
-                          width: MediaQuery.of(context).size.width,
-                          child: _loadingTopDisc
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Shimmer.fromColors(
-                                    baseColor: const Color.fromARGB(
-                                        255, 126, 123, 123),
-                                    highlightColor: const Color.fromARGB(
-                                        255, 236, 231, 231),
+                                  )
+                                : Flexible(
                                     child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: 4,
+                                      itemCount: top10Tracks.length,
                                       itemBuilder: (context, index) {
-                                        return const DummyCard();
-                                      },
-                                    ),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: discografia.length,
-                                  itemBuilder: (context, index) {
-                                    var item = discografia[index];
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        final List<spoti.Track>? tracks =
-                                            await _searchService
-                                                .albumsTracks(item.id!);
-                                        Provider.of<PageState>(context,
-                                                listen: false)
-                                            .updateSelectedPage(6);
-                                        Provider.of<ImagePlayListAndAlbumstate>(
-                                                context,
-                                                listen: false)
-                                            .updateImageUrl(
-                                                item.images!.first.url!);
-                                        Provider.of<AudioPLayerProvider>(
-                                                context,
-                                                listen: false)
-                                            .updateTrackList(tracks);
-                                        Provider.of<TypereproducerState>(
-                                                context,
-                                                listen: false)
-                                            .updatePlayMusicBarState(item);
-                                      },
-                                      child: Container(
-                                        width: 150,
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 5),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              height: 150,
-                                              decoration: BoxDecoration(
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                    color: Colors.white,
-                                                  ),
-                                                  BoxShadow(
-                                                    color: Colors.white,
-                                                  )
-                                                ],
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      item.images!.first.url!),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                        return GestureDetector(
+                                          onTap: () {
+                                            Provider.of<AudioPLayerProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .updateTrackList(top10Tracks);
+                                            Provider.of<CurrentIndexMusicState>(
+                                                    context,
+                                                    listen: false)
+                                                .updateCurrentIndexMusic(index);
+                                            Provider.of<PlayMusicBarState>(
+                                                    context,
+                                                    listen: false)
+                                                .updatePlayMusicBarState(true);
+                                            Provider.of<TypereproducerState>(
+                                                    context,
+                                                    listen: false)
+                                                .updatePlayMusicBarState(
+                                                    spoti.Track);
+                                          },
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                                border: Border(
+                                                    bottom: BorderSide(
+                                                        width: 2,
+                                                        color: Colors.grey))),
+                                            child: ListTile(
+                                              leading: Image.network(
+                                                  '${top10Tracks[index].album!.images!.first.url}'),
+                                              title: Text(
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                '${index + 1}. ${top10Tracks[index].name!}',
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                              subtitle: Text(
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                '${top10Tracks[index].album!.name}',
+                                                style: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
                                               ),
                                             ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              item.name!,
-                                              style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 3),
-                                            Text(
-                                              item.releaseDate!,
-                                              style: const TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 12),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                          ),
+                          SizedBox(
+                            height: 30,
+                            width: MediaQuery.sizeOf(context).width,
+                            child: ElevatedButton(
+                                onPressed: () {},
+                                child: const Center(
+                                  child: Text(
+                                    'Mostrar tudo',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                )),
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'Ultimo Lancamento',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 31, 30, 30),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  height: 150,
+                                  width: 150,
+                                  decoration: BoxDecoration(
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.white,
                                       ),
-                                    );
-                                  },
+                                      BoxShadow(
+                                        color: Colors.white,
+                                      )
+                                    ],
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          '${discografia.first.images!.first.url}'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                        ),
-                      ],
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          style: TextStyle(fontSize: 18),
+                                          '${discografia.first.albumType!.name.substring(0, 1).toUpperCase()}${discografia.first.albumType!.name.substring(
+                                            1,
+                                          )}'),
+                                      Text(
+                                          style: TextStyle(
+                                              fontSize: 18, color: Colors.grey),
+                                          'De ${discografia.first.artists!.first.name}'),
+                                      Text(
+                                          style: TextStyle(
+                                              fontSize: 15, color: Colors.grey),
+                                          'Lancado em ${discografia.first.releaseDate}')
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'Discografia',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          Container(
+                            decoration: const BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                  color: Color.fromARGB(255, 149, 148, 148),
+                                  blurRadius: 20,
+                                  blurStyle: BlurStyle.outer,
+                                  offset: Offset.infinite),
+                            ]),
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            child: _loadingTopDisc
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color.fromARGB(
+                                          255, 126, 123, 123),
+                                      highlightColor: const Color.fromARGB(
+                                          255, 236, 231, 231),
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: 4,
+                                        itemBuilder: (context, index) {
+                                          return const DummyCard();
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: discografia.length,
+                                    itemBuilder: (context, index) {
+                                      var item = discografia[index];
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          final List<spoti.Track>? tracks =
+                                              await _searchService
+                                                  .albumsTracks(item.id!);
+                                          Provider.of<PageState>(context,
+                                                  listen: false)
+                                              .updateSelectedPage(6);
+                                          Provider.of<ImagePlayListAndAlbumstate>(
+                                                  context,
+                                                  listen: false)
+                                              .updateImageUrl(
+                                                  item.images!.first.url!);
+                                          Provider.of<AudioPLayerProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .updateTrackList(tracks);
+                                          Provider.of<TypereproducerState>(
+                                                  context,
+                                                  listen: false)
+                                              .updatePlayMusicBarState(item);
+                                        },
+                                        child: Container(
+                                          width: 150,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                height: 150,
+                                                decoration: BoxDecoration(
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Colors.white,
+                                                    ),
+                                                    BoxShadow(
+                                                      color: Colors.white,
+                                                    )
+                                                  ],
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(item
+                                                        .images!.first.url!),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 5),
+                                              Text(
+                                                item.name!,
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text(
+                                                item.releaseDate!,
+                                                style: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'Artistas semelhantes',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                            decoration: const BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                  color: Color.fromARGB(255, 149, 148, 148),
+                                  blurRadius: 20,
+                                  blurStyle: BlurStyle.outer,
+                                  offset: Offset.infinite),
+                            ]),
+                            height: 190,
+                            width: MediaQuery.of(context).size.width,
+                            child: _loadingTopDisc
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color.fromARGB(
+                                          255, 126, 123, 123),
+                                      highlightColor: const Color.fromARGB(
+                                          255, 236, 231, 231),
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: 4,
+                                        itemBuilder: (context, index) {
+                                          return const DummyCard();
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: 12,
+                                    itemBuilder: (context, index) {
+                                      var item = artists[index];
+                                      print(artists.length);
+                                      return GestureDetector(
+                                          onTap: () async {},
+                                          child: Row(
+                                            children: [
+                                              CircularArtistCard(
+                                                artistName: item.name!,
+                                                imageUrl:
+                                                    item.images!.first!.url!,
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              )
+                                            ],
+                                          ));
+                                    },
+                                  ),
+                          ),
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'Playlists',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                            decoration: const BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                  color: Color.fromARGB(255, 149, 148, 148),
+                                  blurRadius: 20,
+                                  blurStyle: BlurStyle.outer,
+                                  offset: Offset.infinite),
+                            ]),
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            child: _loadingTopDisc
+                                ? Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Shimmer.fromColors(
+                                      baseColor: const Color.fromARGB(
+                                          255, 126, 123, 123),
+                                      highlightColor: const Color.fromARGB(
+                                          255, 236, 231, 231),
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: 4,
+                                        itemBuilder: (context, index) {
+                                          return const DummyCard();
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: playlists.length,
+                                    itemBuilder: (context, index) {
+                                      var item = playlists[index];
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          final List<spoti.Track>? tracks =
+                                              await _searchService
+                                                  .albumsTracks(item.id!);
+                                          Provider.of<PageState>(context,
+                                                  listen: false)
+                                              .updateSelectedPage(6);
+                                          Provider.of<ImagePlayListAndAlbumstate>(
+                                                  context,
+                                                  listen: false)
+                                              .updateImageUrl(
+                                                  item.images!.first.url!);
+                                          Provider.of<AudioPLayerProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .updateTrackList(tracks);
+                                          Provider.of<TypereproducerState>(
+                                                  context,
+                                                  listen: false)
+                                              .updatePlayMusicBarState(item);
+                                        },
+                                        child: Container(
+                                          width: 150,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                height: 150,
+                                                decoration: BoxDecoration(
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Colors.white,
+                                                    ),
+                                                    BoxShadow(
+                                                      color: Colors.white,
+                                                    )
+                                                  ],
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(item
+                                                        .images!.first.url!),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 5),
+                                              Text(
+                                                item.name!,
+                                                style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 3),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
