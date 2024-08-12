@@ -51,8 +51,8 @@ class _ArtistPageState extends State<ArtistPage> {
         _loadingTop10 = false;
       });
 
-      List<spoti.Album>? albums = await _searchService.Discografia(
-          artist!.id!, ['album', 'single', 'appears_on', 'compilation']);
+      List<spoti.Album>? albums =
+          await _searchService.Discografia(artist!.id!, ['album', 'single']);
 
       setState(() {
         _loadingTopDisc = false;
@@ -272,6 +272,67 @@ class _ArtistPageState extends State<ArtistPage> {
                         ),
                         const SizedBox(
                           height: 5,
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: const Text(
+                            'Ultimo Lancamento',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 31, 30, 30),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                height: 150,
+                                width: 150,
+                                decoration: BoxDecoration(
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.white,
+                                    ),
+                                    BoxShadow(
+                                      color: Colors.white,
+                                    )
+                                  ],
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                        '${discografia.first.images!.first.url}'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        style: TextStyle(fontSize: 18),
+                                        '${discografia.first.albumType!.name.substring(0, 1).toUpperCase()}${discografia.first.albumType!.name.substring(
+                                          1,
+                                        )}'),
+                                    Text(
+                                        style: TextStyle(
+                                            fontSize: 18, color: Colors.grey),
+                                        'De ${discografia.first.artists!.first.name}'),
+                                    Text(
+                                        style: TextStyle(
+                                            fontSize: 15, color: Colors.grey),
+                                        'Lancado em ${discografia.first.releaseDate}')
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                         TextButton(
                           onPressed: () {},

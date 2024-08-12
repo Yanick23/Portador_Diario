@@ -26,11 +26,15 @@ class SearchService {
   Future<List<Album>?> Discografia(String idArtist, List<String> lista) async {
     List<Album> ll = [];
 
-    var tracks = await _spotifyApi.artists
-        .albums(idArtist, country: Market.MZ, includeGroups: lista);
-    tracks.first().then(
+    var tracks = await _spotifyApi.artists.albums(
+      idArtist,
+      country: Market.MZ,
+      includeGroups: lista,
+    );
+
+    await tracks.all().then(
       (value) {
-        value!.items!.forEach(
+        value.forEach(
           (element) {
             print(element.name);
             ll.add(element);
@@ -38,6 +42,17 @@ class SearchService {
         );
       },
     );
+    DateTime parseDate(String date) {
+      if (date.length == 4) {
+        date = "$date-01-01";
+      } else if (date.length == 7) {
+        date = "$date-01";
+      }
+      return DateTime.parse(date);
+    }
+
+    ll.sort((a, b) =>
+        parseDate(b.releaseDate!).compareTo(parseDate(a.releaseDate!)));
 
     return ll;
   }
