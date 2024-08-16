@@ -13,7 +13,7 @@ class AudioPLayerProvider with ChangeNotifier {
   List<Track> get getTrackList => _trackList;
   List<Track> get getTrackListEmOrdem => _trackListEmOrdem;
   final AudioPlayer _audioPLayer = AudioPlayer();
-  final List<AudioSource> _playlist = [];
+  List<AudioSource> _playlist = [];
 
   AudioPlayer get audioPlayer => _audioPLayer;
   List<AudioSource> get playlist => _playlist;
@@ -28,6 +28,60 @@ class AudioPLayerProvider with ChangeNotifier {
     _trackListEmOrdem = trackList!;
 
     notifyListeners();
+  }
+
+  void updateTrackListToSources(List<Track>? trackList) {
+    // Verifica se a lista de faixas não é nula antes de prosseguir
+    if (trackList == null) return;
+
+    // Mapeia cada faixa para uma instância de AudioSource
+    var tracs = trackList.map(
+      (e) {
+        return AudioSource.uri(
+          Uri.parse(e.href!),
+          tag: MediaItem(
+            id: e.id!,
+            title: e.name!,
+            album: e.album!.name,
+            artist: e.artists!.first.name,
+            duration: Duration(milliseconds: e.durationMs!),
+            artUri: Uri.parse(e.album!.images!.first.url!),
+          ),
+        );
+      },
+    ).toList(); // Adiciona os parênteses aqui para criar a lista
+
+    // Atualiza a playlist com a nova lista de fontes de áudio
+    _playlist = tracs;
+
+    // Notifica os ouvintes (listeners) sobre a mudança
+    notifyListeners();
+  }
+
+  void updateTrackUri(String trackId, String newUri) {
+    // Encontra o índice da faixa na playlist que possui o ID correspondente
+    int trackIndex = _playlist.indexWhere((audioSource) {
+      var uriAudioSource = audioSource as UriAudioSource; // Faz a conversão
+      return (uriAudioSource.tag as MediaItem).id == trackId;
+    });
+
+    // Verifica se a faixa foi encontrada
+    if (trackIndex != -1) {
+      // Obtém a faixa antiga e faz o cast para UriAudioSource
+      var oldTrack = _playlist[trackIndex] as UriAudioSource;
+
+      // Cria uma nova AudioSource com a nova URI, mas mantém o restante das informações
+      var updatedTrack = AudioSource.uri(
+        Uri.parse(newUri),
+        tag: oldTrack.tag, // Reutiliza o MediaItem existente
+      );
+
+      // Atualiza a faixa na lista de reprodução
+      _playlist[trackIndex] = updatedTrack;
+
+      // Notifica os ouvintes sobre a mudança
+      notifyListeners();
+    }
   }
 
   Future<void> setTackOnPlayList(Track e) async {

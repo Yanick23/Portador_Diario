@@ -330,6 +330,9 @@ class _PlayListMusicState extends State<PlayListMusic> {
                                     Provider.of<AudioPLayerProvider>(context,
                                             listen: false)
                                         .updateTrackListEmOrdem(list);
+                                    Provider.of<AudioPLayerProvider>(context,
+                                            listen: false)
+                                        .updateTrackListToSources(list);
                                     Provider.of<CurrentIndexMusicState>(context,
                                             listen: false)
                                         .updateCurrentIndexMusic(index);

@@ -147,22 +147,31 @@ class _MusicPlayerState extends State<MusicPlayer> {
 
   Future<void> _playMusic(String text) async {
     final yt = YoutubeExplode();
-    final video = (await yt.search.search(text)).first;
-    final videoId = video.id.value;
-    var manifest = await yt.videos.streamsClient.getManifest(videoId);
-    var audioUrl = manifest.audioOnly.last.url;
+    try {
+      final video = (await yt.search.search(text)).first;
+      final videoId = video.id.value;
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
+      var audioUrl = manifest.audioOnly.last.url;
 
-    player.setAudioSource(AudioSource.uri(Uri.parse(audioUrl.toString()),
-        tag: MediaItem(
-            id: '${a[track!].id}',
-            title: '${a[track!].name}',
-            artUri: Uri.parse('${a[track!].album!.images!.first.url}'),
-            album: '${a[track!].album!.name}')));
+      List<AudioSource> child =
+          Provider.of<AudioPLayerProvider>(context, listen: false).playlist;
+      Provider.of<AudioPLayerProvider>(context, listen: false)
+          .updateTrackUri(a[track!].id!, audioUrl.toString());
 
-    await player.play();
-    setState(() {
-      isPlaying = true;
-    });
+      // Descomentar e configurar corretamente a fonte de áudio
+      await player.setAudioSource(
+        ConcatenatingAudioSource(children: child),
+        initialIndex: track!,
+      );
+
+      await player.play();
+      setState(() {
+        isPlaying = true;
+      });
+    } catch (e) {
+      print('Erro ao tentar reproduzir a música: $e');
+      // Tratamento de erro: exibir mensagem ao usuário ou tentar novamente
+    }
   }
 
   late Color? color = Colors.black;
@@ -183,7 +192,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
       await _playMusic('${artistNames} - ${currentTrack.name} (Lyrics)');
 
       String? image = currentTrack.album?.images?.first.url;
-      final tempSongColor = await getImagePalette(NetworkImage(image!), 0.3);
+      final tempSongColor = await getImagePalette(NetworkImage(image!), 0.2);
 
       setState(() {
         color = tempSongColor;
