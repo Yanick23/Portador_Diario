@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.only(left: 8),
                 child: ListView.builder(
                   padding: const EdgeInsets.all(10),
-                  itemCount: 10,
+                  itemCount: 15,
                   itemBuilder: (context, index) {
                     var artist = ArtistService().mostPopularArtist()![index];
                     return Row(
@@ -74,8 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {
                             Provider.of<ArtistProvider>(context, listen: false)
                                 .setAtistt(artist);
-                            Provider.of<PageState>(context, listen: false)
-                                .updateSelectedPage(7);
+                            Navigator.of(context).pushNamed('/artistPage');
                           },
                           child: CardArtistaFavorito(artista: artist),
                         ),

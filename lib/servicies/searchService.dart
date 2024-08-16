@@ -6,15 +6,34 @@ class SearchService {
 
   SearchService(String clientId, String clientSecret)
       : _spotifyApi = SpotifyApi(SpotifyApiCredentials(clientId, clientSecret));
-  Future<List<Track>?> albumsTracks(String albumId) async {
-    List<Track> ll = [];
+  Future<List<Track>?> albumsTracks(String albumId, Album album) async {
     try {
       var tracks = await _spotifyApi.albums.tracks(albumId).all();
-      tracks.forEach(
-        (element) {
-          ll.add(Track.fromJson(element.toJson()));
-        },
-      );
+
+      List<Track> trackList = tracks.map((element) {
+        Track track = Track.fromJson(element.toJson());
+
+        track.album ??= Album();
+        track.album!.images ??= [];
+
+        track.album!.images!.add(album.images!.first);
+
+        return track;
+      }).toList();
+
+      return trackList;
+    } catch (e) {
+      print('Error fetching album tracks: $e');
+      return null;
+    }
+  }
+
+  Future<List<Track>?> getTrack(String trackId) async {
+    List<Track> ll = [];
+    try {
+      var track = await _spotifyApi.tracks.get(trackId);
+
+      ll.add(Track.fromJson(track.toJson()));
 
       return ll;
     } catch (e) {

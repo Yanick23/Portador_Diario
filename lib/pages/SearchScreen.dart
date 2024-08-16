@@ -190,9 +190,9 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: _isLoading
                   ? Padding(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       child: Shimmer.fromColors(
-                        baseColor: Color.fromARGB(255, 126, 123, 123),
+                        baseColor: const Color.fromARGB(255, 126, 123, 123),
                         highlightColor: Color.fromARGB(255, 236, 231, 231),
                         child: ListView.builder(
                           itemCount: 10,
@@ -281,7 +281,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildSearchResults() {
     if (_filterObjects.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'Nenhum resultado encontrado.',
           style: TextStyle(color: Colors.white),
@@ -298,24 +298,24 @@ class _SearchScreenState extends State<SearchScreen> {
           leading: Image.network(
             _getResultImageUrl(result)!,
             errorBuilder: (context, error, stackTrace) {
-              return Icon(Icons.disc_full, color: Colors.white);
+              return const Icon(Icons.disc_full, color: Colors.white);
             },
           ),
           title: Text(
             _getResultName(result)!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
             _getResultType(result)!,
-            style: TextStyle(color: Colors.white54),
+            style: const TextStyle(color: Colors.white54),
           ),
           onTap: () {
             if (result is spoti.Track) {
               _handleTrackTap(context, result);
             }
-            if (result is spoti.AlbumSimple) {
+            if (result is spoti.Album) {
               _handleAlbumTap(context, result);
             } else if (result is spoti.PlaylistSimple) {
               _handlePlayListTap(context, result);
@@ -373,31 +373,29 @@ class _SearchScreenState extends State<SearchScreen> {
   void _handleTrackTap(BuildContext context, spoti.Track track) {
     final List<spoti.Track>? tracks = [spoti.Track.fromJson(track.toJson())];
 
-    Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
+    Navigator.of(context).pushNamed('/playlistMusic');
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(track!.album!.images!.first!.url!);
     Provider.of<AudioPLayerProvider>(context, listen: false)
         .updateTrackList(tracks);
     Provider.of<TypereproducerState>(context, listen: false)
-        .updatePlayMusicBarState(track);
+        .UpdateTypereproducerState(track);
   }
 
   void _handleArtistTap(BuildContext context, spoti.Artist artist) {
     Provider.of<ArtistProvider>(context, listen: false).setAtistt(artist);
-    Provider.of<PageState>(context, listen: false).updateSelectedPage(7);
+    Navigator.of(context).pushNamed('/artistPage');
   }
 
-  void _handleAlbumTap(
-      BuildContext context, spoti.AlbumSimple albumSimple) async {
+  void _handleAlbumTap(BuildContext context, spoti.Album albumSimple) async {
     final List<spoti.Track>? tracks =
-        await _searchService.albumsTracks(albumSimple.id!);
-    Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
+        await _searchService.albumsTracks(albumSimple.id!, albumSimple);
+    Navigator.of(context).pushNamed('/playlistMusic');
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(albumSimple.images!.first!.url!);
-    Provider.of<AudioPLayerProvider>(context, listen: false)
-        .updateTrackList(tracks);
+
     Provider.of<TypereproducerState>(context, listen: false)
-        .updatePlayMusicBarState(albumSimple);
+        .UpdateTypereproducerState(albumSimple);
   }
 
   void _handlePlayListTap(
@@ -405,12 +403,11 @@ class _SearchScreenState extends State<SearchScreen> {
     final List<spoti.Track>? tracks =
         await _searchService.playListTrack(playlist.id!);
     final bf = tracks?.map((e) => print(e.name)).toList() ?? [];
-    Provider.of<PageState>(context, listen: false).updateSelectedPage(6);
+    Navigator.of(context).pushNamed('/playlistMusic');
     Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
         .updateImageUrl(playlist.images!.first!.url!);
-    Provider.of<AudioPLayerProvider>(context, listen: false)
-        .updateTrackList(tracks);
+
     Provider.of<TypereproducerState>(context, listen: false)
-        .updatePlayMusicBarState(playlist);
+        .UpdateTypereproducerState(playlist);
   }
 }

@@ -5,7 +5,7 @@ class TypereproducerState extends ChangeNotifier {
 
   Object get ObjecTypereproducer => _ObjecTypereproducer;
 
-  void updatePlayMusicBarState(Object object) {
+  void UpdateTypereproducerState(Object object) {
     _ObjecTypereproducer = object;
     notifyListeners();
   }

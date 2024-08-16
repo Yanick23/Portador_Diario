@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spoti_stream_music/models/modelsData.dart' as play;
+import 'package:spotify/spotify.dart' as play;
 
 class CardplayListInfo extends StatelessWidget {
   final play.Playlist playlistinfo;

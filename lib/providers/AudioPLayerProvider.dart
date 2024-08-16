@@ -8,7 +8,10 @@ import 'package:just_audio/just_audio.dart';
 class AudioPLayerProvider with ChangeNotifier {
   List<Track> _trackList = [];
 
+  List<Track> _trackListEmOrdem = [];
+
   List<Track> get getTrackList => _trackList;
+  List<Track> get getTrackListEmOrdem => _trackListEmOrdem;
   final AudioPlayer _audioPLayer = AudioPlayer();
   final List<AudioSource> _playlist = [];
 
@@ -17,6 +20,12 @@ class AudioPLayerProvider with ChangeNotifier {
 
   void updateTrackList(List<Track>? trackList) {
     _trackList = trackList!;
+
+    notifyListeners();
+  }
+
+  void updateTrackListEmOrdem(List<Track>? trackList) {
+    _trackListEmOrdem = trackList!;
 
     notifyListeners();
   }

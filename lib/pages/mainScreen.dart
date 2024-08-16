@@ -21,6 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   late DraggableScrollableController _controller;
   bool showBarPlay = true;
   double _navBarOpacity = 1.0;
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   final List<Widget> _widgets = [
     const HomeScreen(),
@@ -59,13 +60,44 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          _widgets[selectedPage],
+          Navigator(
+            key: _navigatorKey,
+            onGenerateRoute: (RouteSettings settings) {
+              Widget page;
+              switch (settings.name) {
+                case '/artistPage':
+                  page = const ArtistPage();
+                  break;
+                case '/playlistMusic':
+                  page = const PlayListMusic();
+                  break;
+                case '/playlist':
+                  page = const Playlistscreen();
+                  break;
+                case '/search':
+                  page = const SearchScreen();
+                  break;
+                case '/favorites':
+                  page = const Favoritoscreen();
+                  break;
+                default:
+                  page = _widgets[selectedPage];
+                  break;
+              }
+              return MaterialPageRoute(builder: (_) => page);
+            },
+          ),
           if (playBarState)
             DraggableScrollableSheet(
               controller: _controller,
               initialChildSize: 0.12,
               minChildSize: 0.12,
               maxChildSize: 1,
+              snapSizes: const [1],
+              shouldCloseOnMinExtent: true,
+              expand: true,
+              snap: true,
+              snapAnimationDuration: Duration(milliseconds: 300),
               builder: (context, ScrollController scrollController) {
                 return SingleChildScrollView(
                   controller: scrollController,
@@ -108,19 +140,15 @@ class _MainScreenState extends State<MainScreen> {
                         label: 'Música',
                         selectedPage: selectedPage,
                         targetPage: 0,
+                        route: '/',
                         color: selectedPage == 0 ? Colors.blue : null,
-                      ),
-                      _buildNavItem(
-                        icon: Icons.podcasts_rounded,
-                        label: 'Podcast',
-                        selectedPage: selectedPage,
-                        targetPage: 1,
                       ),
                       _buildNavItem(
                         icon: Icons.favorite_border,
                         label: 'Favoritos',
                         selectedPage: selectedPage,
                         targetPage: 2,
+                        route: '/favorites',
                         color: selectedPage == 2 ||
                                 selectedPage == 4 ||
                                 selectedPage == 5 ||
@@ -133,6 +161,7 @@ class _MainScreenState extends State<MainScreen> {
                         label: 'Pesquisa',
                         selectedPage: selectedPage,
                         targetPage: 3,
+                        route: '/search',
                         color: selectedPage == 3 ? Colors.blue : null,
                       ),
                     ],
@@ -149,6 +178,7 @@ class _MainScreenState extends State<MainScreen> {
     required String label,
     required int selectedPage,
     required int targetPage,
+    required String route,
     Color? color,
   }) {
     return Column(
@@ -167,15 +197,16 @@ class _MainScreenState extends State<MainScreen> {
               size: 25,
               color: color,
             ),
-            onPressed: () => {
+            onPressed: () {
               Provider.of<PageState>(context, listen: false)
-                  .updateSelectedPage(targetPage),
+                  .updateSelectedPage(targetPage);
+              _navigatorKey.currentState?.pushNamed(route);
             },
           ),
         ),
         Text(
           label,
-          style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(fontWeight: FontWeight.w300, color: color),
         ),
       ],
     );

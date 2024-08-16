@@ -7,16 +7,17 @@ import 'package:spoti_stream_music/providers/artistsProvider.dart';
 
 import 'package:spoti_stream_music/providers/currentIndexMusicState.dart';
 import 'package:spoti_stream_music/providers/imagePlayListAndAlbumState.dart';
+import 'package:spoti_stream_music/providers/keyPlayreState.dart';
 import 'package:spoti_stream_music/providers/pageState.dart';
 import 'package:spoti_stream_music/providers/AudioPLayerProvider.dart';
 import 'package:spoti_stream_music/providers/playMusicBarState.dart';
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 
-void main()  async{
-  
+void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ArtistProvider()),
+      ChangeNotifierProvider(create: (_) => Keyplayrestate()),
       ChangeNotifierProvider(
         create: (context) => PageState(),
       ),

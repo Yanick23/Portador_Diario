@@ -72,8 +72,7 @@ class _PageViewFavoriteMusicState extends State<PageViewFavoriteMusic> {
           ),
           GestureDetector(
             onTap: () {
-              Provider.of<PageState>(context, listen: false)
-                  .updateSelectedPage(5);
+              Navigator.of(context).pushNamed('/playlist');
             },
             child: const OptionFavoritePage(
               text: "Playlists",

@@ -38,18 +38,23 @@ class TrackCard extends StatelessWidget {
             '${artista}',
             style: TextStyle(color: const Color.fromARGB(255, 188, 181, 181)),
           ),
-          trailing: Container(
-            width: 75,
+          /**trailing: Container(
+            width: 100,
             child: Row(
               children: [
                 IconButton(
+                  color: Colors.blue,
                   icon: Icon(Icons.favorite_sharp),
                   onPressed: () {},
                 ),
-                Icon(Icons.more_vert_sharp)
+                IconButton(
+                  color: Colors.blue,
+                  icon: Icon(Icons.more_vert_sharp),
+                  onPressed: () {},
+                ),
               ],
             ),
-          ),
+          ),*/
         ));
   }
 }

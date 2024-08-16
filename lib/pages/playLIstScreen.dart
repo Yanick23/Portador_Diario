@@ -8,6 +8,8 @@ import 'package:spoti_stream_music/providers/pageState.dart';
 
 import 'package:spoti_stream_music/providers/typeReproducer.dart';
 import 'package:spoti_stream_music/servicies/playListService.dart';
+import 'package:spoti_stream_music/widgets/CardPlayList.dart';
+import 'package:spoti_stream_music/widgets/cardplayListInfo.dart';
 
 import 'package:spotify/spotify.dart';
 
@@ -43,12 +45,6 @@ class _PlaylistscreenState extends State<Playlistscreen> {
             ),
           )
         ],
-        leading: IconButton(
-            onPressed: () {
-              Provider.of<PageState>(context, listen: false)
-                  .updateSelectedPage(4);
-            },
-            icon: const Icon(Icons.arrow_back)),
         title: const Text(
           "Playlists",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -63,13 +59,15 @@ class _PlaylistscreenState extends State<Playlistscreen> {
 
             return GestureDetector(
               onTap: () {
-                Provider.of<TypereproducerState>(context, listen: false)
-                    .updatePlayMusicBarState(playlist);
-                Provider.of<PageState>(context, listen: false)
-                    .updateSelectedPage(6);
+                Navigator.of(context).pushNamed('/playlistMusic');
                 Provider.of<ImagePlayListAndAlbumstate>(context, listen: false)
                     .updateImageUrl(_playlists[index].images!.first.url!);
+                Provider.of<TypereproducerState>(context, listen: false)
+                    .UpdateTypereproducerState(playlist);
               },
+              child: CardplayListInfo(
+                playlistinfo: playlist,
+              ),
             );
           },
         ),
