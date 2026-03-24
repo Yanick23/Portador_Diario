@@ -8,7 +8,7 @@ import 'package:melody_player/features/audio_player/presentation/bloc/artist_cub
 import 'package:melody_player/features/audio_player/presentation/bloc/current_index_cubit.dart';
 import 'package:melody_player/features/audio_player/presentation/bloc/type_reproducer_cubit.dart';
 import 'package:melody_player/features/audio_player/presentation/bloc/image_playlist_and_album_cubit.dart';
-import 'package:melody_player/features/home/presentation/pages/mainScreen.dart';
+import 'package:melody_player/features/home/presentation/pages/main_layout.dart';
 import 'package:melody_player/features/search/presentation/pages/playLIstScreen.dart';
 
 import 'package:melody_player/core/services/service_locator.dart' as di;
@@ -40,11 +40,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: const ColorScheme.dark()),
+      title: 'Melody Player',
+      theme: ThemeData(
+        colorScheme: const ColorScheme.dark(),
+        useMaterial3: true,
+      ),
       initialRoute: "/",
       routes: {
-        "/": (context) => const MainScreen(),
+        "/": (context) => const MainLayout(),
         "/playlist": (context) => const Playlistscreen()
       },
     );

@@ -1,8 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:melody_player/features/search/presentation/pages/pageViewFavoriteMusic.dart';
+import 'package:melody_player/core/presentation/responsive/responsive_layout.dart';
+import 'package:melody_player/features/home/presentation/widgets/music_card.dart';
 
 class Favoritoscreen extends StatefulWidget {
   const Favoritoscreen({super.key});
@@ -14,227 +12,127 @@ class Favoritoscreen extends StatefulWidget {
 class _FavoritoscreenState extends State<Favoritoscreen> {
   int _selectedIndex = 0;
 
-  late Color color = Color(0xFF00EEFF);
-  late Color color2 = Colors.transparent;
-
-  static final List<Widget> _widgetOptions = [
-    PageViewFavoriteMusic(),
-    Center(child: Text("6"))
-  ];
-
-  void _onItemTapped_1(int index) {
-    setState(() {
-      _selectedIndex = index;
-
-      print("kk");
-      color = Color(0xFF00EEFF);
-      color2 = Colors.transparent;
-    });
-  }
-
-  void _onItemTapped_2(int index) {
-    setState(() {
-      _selectedIndex = index;
-      color2 = Color(0xFF00EEFF);
-      color = Colors.transparent;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    bool isDesktop = ResponsiveLayout.isDesktop(context);
+
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                height: 278,
-                color: const Color.fromARGB(255, 37, 36, 36),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 8, right: 8, top: 40),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Spoti Stream nusic",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  color: Colors.grey,
-                                  Icons.notifications_none_outlined,
-                                  size: 30,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  color: Colors.grey,
-                                  Icons.settings,
-                                  size: 30,
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 20, left: 8, right: 8),
-                      child: const Text("Ouvido recentimente",
-                          style: TextStyle(
-                              color: Color.fromARGB(255, 221, 221, 221),
-                              fontSize: 18)),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(bottom: 8, left: 8, right: 8),
-                      height: 100,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          Container(
-                            alignment: Alignment.bottomLeft,
-                            width: 100,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.play_circle_fill,
-                                size: 40,
-                              ),
-                              onPressed: () => {},
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Container(
-                            alignment: Alignment.bottomLeft,
-                            width: 100,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.play_circle_fill,
-                                size: 40,
-                              ),
-                              onPressed: () => {},
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Container(
-                            alignment: Alignment.bottomLeft,
-                            width: 100,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.play_circle_fill,
-                                size: 40,
-                              ),
-                              onPressed: () => {},
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                          Container(
-                            alignment: Alignment.bottomLeft,
-                            width: 100,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.play_circle_fill,
-                                size: 40,
-                              ),
-                              onPressed: () => {},
-                            ),
-                          ),
-                          SizedBox(
-                            width: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            _onItemTapped_1(0);
-                          },
-                          child: Container(
-                            width: 185,
-                            child: Column(
-                              children: [
-                                Container(
-                                    padding: EdgeInsets.only(top: 12),
-                                    child: Text(
-                                      "Musica",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    )),
-                                Container(
-                                    alignment: Alignment(0, 6),
-                                    child: Container(height: 2, color: color))
-                              ],
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            _onItemTapped_2(1);
-                          },
-                          child: Container(
-                            width: 185,
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(top: 12),
-                                  child: Center(
-                                    child: Text("Podcasts",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                                ),
-                                Container(
-                                    alignment: Alignment(0, 6),
-                                    child: Container(height: 2, color: color2))
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  ],
+      backgroundColor: Colors.black,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: isDesktop ? 200.0 : 150.0,
+            pinned: true,
+            backgroundColor: Colors.black,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text('Favoritos',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.blueGrey, Colors.black],
+                  ),
                 ),
               ),
-              Container(
-                child: _widgetOptions[_selectedIndex],
-              )
-            ],
+            ),
           ),
-        ));
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  _buildTabButton("Músicas", 0),
+                  const SizedBox(width: 16),
+                  _buildTabButton("Podcasts", 1),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24.0 : 16.0),
+            sliver: _selectedIndex == 0
+                ? _buildFavoriteMusics(context)
+                : _buildPodcasts(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String label, int index) {
+    bool isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white54,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontSize: 16,
+            ),
+          ),
+          if (isSelected)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              height: 2,
+              width: 20,
+              color: Colors.blue,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteMusics(BuildContext context) {
+    // For now, we reuse PageViewFavoriteMusic or implement a responsive grid
+    bool isDesktop = ResponsiveLayout.isDesktop(context);
+    bool isTablet = ResponsiveLayout.isTablet(context);
+
+    if (isDesktop || isTablet) {
+      return SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isDesktop ? 4 : 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.8,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => MusicCard(
+            onTap: () {},
+            title: 'Liked Song',
+            artist: 'Various Artists',
+            imageUrl: '',
+          ),
+          childCount: 8,
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => ListTile(
+          leading: const Icon(Icons.music_note, color: Colors.white),
+          title:
+              const Text('Liked Song', style: TextStyle(color: Colors.white)),
+          subtitle: const Text('Various Artists',
+              style: TextStyle(color: Colors.white54)),
+          onTap: () {},
+        ),
+        childCount: 20,
+      ),
+    );
+  }
+
+  Widget _buildPodcasts() {
+    return const SliverFillRemaining(
+      child: Center(
+        child:
+            Text("Podcasts em breve", style: TextStyle(color: Colors.white54)),
+      ),
+    );
   }
 }
