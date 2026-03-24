@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:melody_player/features/audio_player/presentation/bloc/artist_cubit.dart';
+import 'package:melody_player/features/home/presentation/bloc/page_cubit.dart';
+import 'package:melody_player/features/home/data/data_sources/ArtistService.dart';
+import 'package:melody_player/features/home/presentation/widgets/CardPlayList.dart';
+import 'package:melody_player/features/home/presentation/widgets/cardArtistaFavorito.dart';
+
+import 'package:melody_player/core/services/service_locator.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              color: const Color.fromARGB(255, 37, 36, 36),
+              padding: const EdgeInsets.all(8.0),
+              height: 100,
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Musica",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.settings,
+                        size: 30,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(
+                        Icons.notifications_none_sharp,
+                        size: 30,
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 8),
+              child: const Text("Os seus artistas favoritos",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ),
+            Container(
+                height: 250,
+                padding: const EdgeInsets.only(left: 8),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: 15,
+                  itemBuilder: (context, index) {
+                    var artist =
+                        sl<ArtistService>().mostPopularArtist()![index];
+                    return Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            context.read<ArtistCubit>().setArtist(artist);
+                            Navigator.of(context).pushNamed('/artistPage');
+                          },
+                          child: CardArtistaFavorito(artista: artist),
+                        ),
+                        const SizedBox(
+                          width: 30,
+                        )
+                      ],
+                    );
+                  },
+                  scrollDirection: Axis.horizontal,
+                )),
+            Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 8),
+              child: const Text("A pensar em si",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.only(left: 8),
+              height: 280,
+              child: ListView.builder(
+                itemCount: 7,
+                itemBuilder: (context, index) {
+                  return const Row(
+                    children: [
+                      CardPlayList(
+                        descricao: "50 temas",
+                        titulo: "100% azagaia",
+                      ),
+                      SizedBox(
+                        width: 10,
+                      )
+                    ],
+                  );
+                },
+                scrollDirection: Axis.horizontal,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
